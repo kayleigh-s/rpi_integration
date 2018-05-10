@@ -18,13 +18,12 @@ before_install:
   - docker pull leia/agents:0.5.0
 
 install:
-  - docker-compose -f $CI_SOURCE_PATH/docker-compose.yml up --detach
+  - docker --version  # document the version travis is using
+  - docker-compose -f $CI_SOURCE_PATH/docker-compose.yml up -d
   - docker ps -a
 
 script:
   - curl -s -H "Content-type: application/json" -X POST -d '[["u", "We will build a chair."], ["a", "get-screwdriver"]]' 0.0.0.0:5002/learn
 
 after_success:
-  - docker --version  # document the version travis is using
   - echo "Success!" # put your normal testing scripts here
-
