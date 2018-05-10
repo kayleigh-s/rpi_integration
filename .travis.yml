@@ -18,7 +18,7 @@ before_install:
   - docker pull leia/agents:0.5.0
 
 install:
-  - docker-compose -f $CI_SOURCE_PATH/docker-compose.yml up
+  - docker-compose -f $CI_SOURCE_PATH/docker-compose.yml up --detach
   - docker ps -a
 
 script:
