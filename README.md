@@ -8,8 +8,8 @@ Once opened, the REST API is available on `0.0.0.0:5002`
 
    * `/learn` -> `POST` raw JSON in the format for the learner; you can post one or more sequential inputs (utterances and actions); the response will be the HTN in JSON format (the current complete HTN, with the latest inputs included)
    * `/alpha/gettree` -> `GET`; returns the current HTN (without modifying it):
-         * use `&format=json` to get the same response format as `/learn`
-         * use `&format=pretty` to get a human readable version
+         * use `?format=json` to get the same response format as `/learn`
+         * use `?format=pretty` to get a human readable version
    * `/alpha/reset` -> `DELETE`; this will clear the current tree (in lieu of killing and restarting the docker containers)
    * `/alpha/maketree` -> deprecated, ignore this command for now
 
@@ -31,7 +31,8 @@ After the docker containers are opened, you can query things via `curl` in a ter
 
 Examples of `curl` requests:
 
- * `curl -i -X GET http://0.0.0.0:5002/alpha/gettree` to get the status of the tree
+ * `curl -i -X GET http://0.0.0.0:5002/alpha/gettree?format=pretty` to get the status of the tree in ascii format
+ * `curl -i -X GET http://0.0.0.0:5002/alpha/gettree?format=json` to get the status of the tree in json format
  * `curl -s -H "Content-type: application/json" -X POST -d '[["u", "We will build a chair."], ["a", "get-screwdriver"]]' 0.0.0.0:5002/learn` to ask the system to learn a new htm from sequence of actions and utterances
  * `curl -i -X DELETE http://0.0.0.0:5002/alpha/reset` to clear the learning
 
@@ -40,7 +41,24 @@ Example of sequences of actions and utterances:
  * `[["u","I will build a chair."], ["u", "I'm building a leg."], ["a", "get-bracket-foot"], ["a", "get-dowel"]]`
  * `[["u", "We will build a chair."], ["a", "get-screwdriver"]`
 
+## Testing
+
+Provide helper functions through an environment file. To use, simply run the following from within the repository.
+
+```bash
+. ./env
+```
+
+The code provides the following helpers.
+
+- `run_docker`: runs the container and exposes server port
+- `push <input json>`: sends the json file to the server
+- `get`: Gets learned tree
+- `check`: runs the desired tests (check outputs against values in `out`)
+
 ## Available actions
+
+If you are posting an action (“a”), then the valid list includes the following keys (you can, alternatively, post any of the below as a “u” using the value):
 
  * `get-screwdriver`: "Get a screwdriver.",
  * `get-bracket-foot`: "Get a foot bracket.",
@@ -53,4 +71,5 @@ Example of sequences of actions and utterances:
  * `get-seat`: "Get the seat.",
  * `hold-seat`: "Hold the seat.",
  * `get-back`: "Get the back.",
- * `hold-back`: "Hold the back.@""
+ * `hold-back`: "Hold the back."
+Test suite for the ontosem docker
