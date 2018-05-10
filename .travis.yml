@@ -24,8 +24,9 @@ install:
 script:
   - docker ps -a
   - docker network ls
-  - ping 0.0.0.0:5002/learn
-  - "curl -s -H 'Content-type: application/json' -X POST -d '[[\"u\", \"We will build a chair.\"], [\"a\", \"get-screwdriver\"]]' 0.0.0.0:5002/learn"
+  - |-
+    curl -i -X GET http://0.0.0.0:5002/alpha/gettree
+  # - "curl -s -H 'Content-type: application/json' -X POST -d '[[\"u\", \"We will build a chair.\"], [\"a\", \"get-screwdriver\"]]' 0.0.0.0:5002/learn"
 
 after_success:
   - echo "Success!" # put your normal testing scripts here
