@@ -19,11 +19,12 @@ before_install:
 
 install:
   - docker --version  # document the version travis is using
-  - docker-compose -f $CI_SOURCE_PATH/docker-compose.yml up -d
+  - docker-compose -f $CI_SOURCE_PATH/docker-compose.yml up -d # -d stands for detached version that runs containers on the background
   - docker ps -a
 
 script:
-  - curl -s -H "Content-type: application/json" -X POST -d '[["u", "We will build a chair."], ["a", "get-screwdriver"]]' 0.0.0.0:5002/learn
+  - "curl -s -H 'Content-type: application/json' -X POST -d '[[\"u\", \"We will build a chair.\"], [\"a\", \"get-screwdriver\"]]' 0.0.0.0:5002/learn"
 
 after_success:
   - echo "Success!" # put your normal testing scripts here
+  - docker-compose down
