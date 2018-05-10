@@ -1,4 +1,4 @@
-# Instructions for running the Apprentice Agents Learner
+# Apprentice Agents Learner [![Build Status](https://travis-ci.org/ScazLab/rpi_integration.svg?branch=master)](https://travis-ci.org/ScazLab/rpi_integration)
 
 ## Description
 
