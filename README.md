@@ -25,7 +25,7 @@ docker pull leia/agents:0.5.0
 
 ## Usage
 
-Run the compose file to turn on 3 containers and their respective services `docker-compose -f ./docker-compose.yml up`
+Run the compose file to turn on 3 containers and their respective services `docker-compose -f ./docker-compose.yml -p rpi_integration up`
 
 After the docker containers are opened, you can query things via `curl` in a terminal window.
 
@@ -33,7 +33,7 @@ Examples of `curl` requests:
 
  * `curl -i -X GET http://0.0.0.0:5002/alpha/gettree?format=pretty` to get the status of the tree in ascii format
  * `curl -i -X GET http://0.0.0.0:5002/alpha/gettree?format=json` to get the status of the tree in json format
- * `curl -s -H "Content-type: application/json" -X POST -d '[["u", "We will build a chair."], ["a", "get-screwdriver"]]' 0.0.0.0:5002/learn` to ask the system to learn a new htm from sequence of actions and utterances
+ * `curl -s -H "Content-type: application/json" -X POST -d '[["u", "We will build a chair."], ["a", "get-screwdriver"]]' http://0.0.0.0:5002/learn` to ask the system to learn a new htm from sequence of actions and utterances
  * `curl -i -X DELETE http://0.0.0.0:5002/alpha/reset` to clear the learning
 
 Example of sequences of actions and utterances:
