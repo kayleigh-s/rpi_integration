@@ -24,6 +24,7 @@ install:
 script:
   - docker ps -a
   - docker network ls
+  - ifconfig
   - |-
     curl -viX GET http://127.0.0.1:5002/alpha/gettree || true
   - |-
