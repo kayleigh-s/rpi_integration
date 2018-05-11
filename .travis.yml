@@ -21,7 +21,7 @@ install:
   - docker --version  # document the version travis is using
   # -d means detached version that runs containers on the background
   # -p is the name of the project (to uniform things)
-  - docker-compose -p rpi_integration -f $CI_SOURCE_PATH/docker-compose.yml up -d
+  - docker-compose -p rpi_integration -f $CI_SOURCE_PATH/docker-compose.yml up &
 
 script:
   - docker ps -a
@@ -48,6 +48,7 @@ script:
     curl -4viX GET http://172.18.0.1:5002/alpha/gettree || true
   - |-
     curl -4viX GET http://172.17.0.1:5002/alpha/gettree || true
+
   # - "curl -s -H 'Content-type: application/json' -X POST -d '[[\"u\", \"We will build a chair.\"], [\"a\", \"get-screwdriver\"]]' 0.0.0.0:5002/learn"
 
 after_success:
