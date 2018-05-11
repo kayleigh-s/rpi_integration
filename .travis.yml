@@ -4,6 +4,11 @@ sudo: required
 language: generic
 notifications:
   email: false
+  slack:
+    rooms:
+    - secure: VkLuVpzjedTNXbDkohShtVu9M/dyPowGyU8s4th1oRaSIKmg7rWPfzWwbmDH3grTYgUqjWS7jJPEVwipfl02Iaee/KcZYgN8EEpi+VDeE9GaDtY0Ih3oTMK3UJ8Hx0kXc/tjgDQhMy8GfRVBs+L/WwoiPwtpfdDu7eeKr3UdxFbV/opL5lbKktTrva7p25RRwo419qHQPLGNdwbKQS5lQycCoM0A9JFkzEYOGy1LqdZu+HfAYp1bpiYLU4hMofHbJ4UJIXFldi8bdHEDoPubFxVQ1EkE5kiBEHdTr+c0FZVNmHQAbwH21imfvaLBxwCeUNXSab4t1HDVitRSuWvnKX7tfXEsRoZFHavW8KeN9ZGfZ4ahYRNRGQ+KJvCcEEkJT/00c1EEGWkVzXkyrkSZKouJPuq05R2eaByaGHaMvx28kMv0l4QrodI11pvjauYzT/Xg459y+obeER9kFLUfPWE8vJVmtyVCWmGq+3RqdBu9CYF4FOWGksR6KSiY8QW0ST1+zhE8py3F8d1QMK0q3YRjMFyEDktGE2z70dc2BypmgO1/8lXjReIETRaOkUUhB0+v0bn3KwNtS5avLN9Mc+rSVzLX7AWd6NYLraGUh4OT4IhP+u6OJUq61kvqatNSNmFEiqfnKaOZVh2L3bliQtymkQQpNkD8TayF3x3QgGY=
+    on_success: change
+    on_failure: always
 env:
   global:
   - CI_SOURCE_PATH=$(pwd)
