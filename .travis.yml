@@ -29,26 +29,26 @@ script:
   - docker network inspect rpiintegration_leia
   - ifconfig
   - |-
-    curl -v  http://127.0.0.1:5002/alpha/gettree || true
+    curl -v  http://127.0.0.1:9000 || true
   - |-
-    curl -v  http://0.0.0.0:5002/alpha/gettree || true
+    curl -v  http://0.0.0.0:9000 || true
   - |-
-    curl -v  http://localhost:5002/alpha/gettree || true
+    curl -v  http://localhost:9000 || true
   - |-
-    curl -v  http://172.18.0.1:5002/alpha/gettree || true
+    curl -v  http://172.18.0.1:9000 || true
   - |-
-    curl -v  http://172.17.0.1:5002/alpha/gettree || true
+    curl -v  http://172.17.0.1:9000 || true
   - |-
-    curl -4v http://127.0.0.1:5002/alpha/gettree || true
+    curl -4v http://127.0.0.1:9000 || true
   - |-
-    curl -4v http://0.0.0.0:5002/alpha/gettree || true
+    curl -4v http://0.0.0.0:9000 || true
   - |-
-    curl -4v http://localhost:5002/alpha/gettree || true
+    curl -4v http://localhost:9000 || true
   - |-
-    curl -4v http://172.18.0.1:5002/alpha/gettree || true
+    curl -4v http://172.18.0.1:9000 || true
   - |-
-    curl -4v http://172.17.0.1:5002/alpha/gettree || true
-  # - "curl -s -H 'Content-type: application/json' -X POST -d '[[\"u\", \"We will build a chair.\"], [\"a\", \"get-screwdriver\"]]' 0.0.0.0:5002/learn"
+    curl -4v http://172.17.0.1:9000 || true
+  # - "curl -s -H 'Content-type: application/json' -X POST -d '[[\"u\", \"We will build a chair.\"], [\"a\", \"get-screwdriver\"]]' 0.0.0.0:9002/learn"
 
 after_success:
   - echo "Success!" # put your normal testing scripts here
