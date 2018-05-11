@@ -20,7 +20,7 @@ Pull the required images from the docker repo:
 ```
 docker login --username=[username]
 docker pull leia/ontosem:1.0.0
-docker pull leia/agents:0.5.0
+docker pull leia/agents:latest.yale
 ```
 
 ## Usage
