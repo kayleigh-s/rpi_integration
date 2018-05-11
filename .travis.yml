@@ -26,18 +26,28 @@ install:
 script:
   - docker ps -a
   - docker network ls
-  - docker network inspect rpi_integration_leia
+  - docker network inspect rpiintegration_leia
   - ifconfig
   - |-
-    curl -viX GET http://127.0.0.1:5002/alpha/gettree || true
+    curl -v  http://127.0.0.1:5002/alpha/gettree || true
   - |-
-    curl -viX GET http://0.0.0.0:5002/alpha/gettree || true
+    curl -v  http://0.0.0.0:5002/alpha/gettree || true
   - |-
-    curl -viX GET http://localhost:5002/alpha/gettree || true
+    curl -v  http://localhost:5002/alpha/gettree || true
   - |-
-    curl -viX GET http://172.18.0.1:5002/alpha/gettree || true
+    curl -v  http://172.18.0.1:5002/alpha/gettree || true
   - |-
-    curl -viX GET http://172.17.0.1:5002/alpha/gettree || true
+    curl -v  http://172.17.0.1:5002/alpha/gettree || true
+  - |-
+    curl -4v http://127.0.0.1:5002/alpha/gettree || true
+  - |-
+    curl -4v http://0.0.0.0:5002/alpha/gettree || true
+  - |-
+    curl -4v http://localhost:5002/alpha/gettree || true
+  - |-
+    curl -4v http://172.18.0.1:5002/alpha/gettree || true
+  - |-
+    curl -4v http://172.17.0.1:5002/alpha/gettree || true
   # - "curl -s -H 'Content-type: application/json' -X POST -d '[[\"u\", \"We will build a chair.\"], [\"a\", \"get-screwdriver\"]]' 0.0.0.0:5002/learn"
 
 after_success:
