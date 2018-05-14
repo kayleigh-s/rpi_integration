@@ -1,1 +1,1 @@
-{"nodes": {"id": 38, "parent": null, "name": "", "combination": "Sequence", "attributes": [], "children": [{"id": 39, "parent": 38, "name": "BUILD CHAIR", "combination": "Sequence", "attributes": [], "children": [{"id": 40, "parent": 39, "name": "ROBOT GET(screwdriver)", "combination": "leaf", "attributes": [], "children": []}]}]}}
+{"nodes": {"id": 1, "parent": null, "name": "BUILD CHAIR", "combination": "Sequential", "attributes": [], "children": [{"id": 2, "parent": 1, "name": "ROBOT GET(screwdriver)", "combination": "Sequential", "attributes": [], "children": []}]}}

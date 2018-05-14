@@ -1,6 +1,7 @@
 import json
 import re
 import unittest
+import os
 from io import open
 
 import requests
@@ -40,20 +41,21 @@ class TestLearner(unittest.TestCase):
         }
 
         self.addr = "http://0.0.0.0:5002"
+        self.curdir = os.path.dirname(os.path.abspath(__file__))
 
     def test_One(self):
         self._delete()
         data = '[["u", "We will build a chair."], ["a", "get-screwdriver"]]'
-        self._post(data)
+        self._learn(data)
 
-        with open("./out/testOne.json", "r", encoding="utf-8") as o:
+        with open(os.path.join(self.curdir,"out/testOne.json"), "r", encoding="utf-8") as o:
             ground_truth = json.load(o)
-            output = self._get()
+            output = json.loads(self._get().text)
             self.assertEqual(ground_truth, output)
 
-    def _post(self, data):
+    def _learn(self, data):
         url = self.addr + "/learn"
-        req = requests.post(url=self.url, data=self.data, headers=self.headers)
+        req = requests.post(url=url, data=data, headers=self.headers)
         return req
 
     def _get(self, frmt="json"):
