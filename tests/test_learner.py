@@ -40,36 +40,39 @@ class TestLearner(unittest.TestCase):
             'Accept': 'application/json',
         }
 
-        self.addr = "http://0.0.0.0:5002"
-        self.curdir = os.path.dirname(os.path.abspath(__file__))
+        self.addr    = "http://0.0.0.0:5002"
+        self.curdir  = os.path.dirname(os.path.abspath(__file__))
         self.maxDiff = None
 
     def test_One(self):
+        """Test one simple sequence of utterance and action."""
         self._delete()
         data = '[["u", "We will build a chair."], ["a", "get-screwdriver"]]'
         self._learn(data)
 
-        with open(
-                os.path.join(self.curdir, "out/testOne.json"),
-                "r",
-                encoding="utf-8") as o:
+        with open(os.path.join(self.curdir, "out/testOne.json"),
+                  "r", encoding="utf-8") as o:
             ground_truth = json.load(o)
             output = json.loads(self._get().text)
             # print self._get().text
             self.assertEqual(ground_truth, output)
 
     def _learn(self, data):
+        """Sends a POST request to learn a new HTN (or update the previous one)
+        from a sequence of actions and utterances."""
         url = self.addr + "/learn"
         req = requests.post(url=url, data=data, headers=self.headers)
         return req
 
     def _get(self, frmt="json"):
+        """Sends a GET request to retrieve the current HTN."""
         assert (frmt == "json" or frmt == "pretty")
         url = self.addr + "/alpha/gettree?format={}".format(frmt)
         req = requests.get(url=url)
         return req
 
     def _delete(self):
+        """Sends a DELETE request to reset the learning."""
         url = self.addr + "/alpha/reset"
         requests.delete(url=url, headers=headers)
 
