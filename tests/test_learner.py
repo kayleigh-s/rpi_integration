@@ -42,6 +42,7 @@ class TestLearner(unittest.TestCase):
 
         self.addr = "http://0.0.0.0:5002"
         self.curdir = os.path.dirname(os.path.abspath(__file__))
+        self.maxDiff = None
 
     def test_One(self):
         self._delete()
@@ -51,6 +52,7 @@ class TestLearner(unittest.TestCase):
         with open(os.path.join(self.curdir,"out/testOne.json"), "r", encoding="utf-8") as o:
             ground_truth = json.load(o)
             output = json.loads(self._get().text)
+            # print self._get().text
             self.assertEqual(ground_truth, output)
 
     def _learn(self, data):
