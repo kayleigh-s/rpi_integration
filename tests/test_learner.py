@@ -41,7 +41,7 @@ class TestLearner(unittest.TestCase):
 
         self.addr = "http://0.0.0.0:5002"
 
-    def testOne(self):
+    def test_One(self):
         self._delete()
         data = '[["u", "We will build a chair."], ["a", "get-screwdriver"]]'
         self._post(data)
@@ -51,18 +51,18 @@ class TestLearner(unittest.TestCase):
             output = self._get()
             self.assertEqual(ground_truth, output)
 
-    def _post(data):
+    def _post(self, data):
         url = self.addr + "/learn"
         req = requests.post(url=self.url, data=self.data, headers=self.headers)
         return req
 
-    def _get(frmt="json"):
+    def _get(self, frmt="json"):
         assert (frmt == "json" or frmt == "pretty")
         url = self.addr + "/alpha/gettree?format={}".format(frmt)
         req = requests.get(url=url)
         return req
 
-    def _delete():
+    def _delete(self):
         url = self.addr + "/alpha/reset"
         requests.delete(url=url, headers=headers)
 
@@ -85,3 +85,6 @@ class TestLearner(unittest.TestCase):
 #     print(data)
 #     print(data == gt)
 #print(data == gt)
+
+if __name__ == '__main__':
+    unittest.main()
