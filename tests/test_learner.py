@@ -1,7 +1,7 @@
 import json
+import os
 import re
 import unittest
-import os
 from io import open
 
 import requests
@@ -49,7 +49,10 @@ class TestLearner(unittest.TestCase):
         data = '[["u", "We will build a chair."], ["a", "get-screwdriver"]]'
         self._learn(data)
 
-        with open(os.path.join(self.curdir,"out/testOne.json"), "r", encoding="utf-8") as o:
+        with open(
+                os.path.join(self.curdir, "out/testOne.json"),
+                "r",
+                encoding="utf-8") as o:
             ground_truth = json.load(o)
             output = json.loads(self._get().text)
             # print self._get().text
@@ -71,10 +74,6 @@ class TestLearner(unittest.TestCase):
         requests.delete(url=url, headers=headers)
 
 
-#data = '[["u", "We will build a chair."], ["a", "get-screwdriver"]]'
-
-#print(get("json").text)
-
 # delete()
 # post(data)
 # g2 = get("json")
@@ -83,11 +82,10 @@ class TestLearner(unittest.TestCase):
 # print(text)
 # print
 # gt = json.loads(text)
-# with open("./out/test.json", "r", encoding='utf-8') as f:
+# with open("./in/full_chair.json", "r", encoding='utf-8') as i:
 #     print("loading")
-#     data = json.load(f)
+#     data = json.load(i)
 #     print(data)
-#     print(data == gt)
 #print(data == gt)
 
 if __name__ == '__main__':
