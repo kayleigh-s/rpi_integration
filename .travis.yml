@@ -35,6 +35,10 @@ script:
   # - docker network inspect rpiintegration_leia
   # - ifconfig
   - python ./tests/test_learner.py
+
+after_script:
+  - sleep 5 
+
 after_success:
   - echo "Success!" # put your normal testing scripts here
   - docker-compose down
