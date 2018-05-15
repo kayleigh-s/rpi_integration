@@ -1,0 +1,14 @@
+[
+    ["u", "We will build a chair."],
+    ["a", "get-screwdriver"],
+    ["a", "get-bracket-foot"],
+    ["a", "get-bracket-front"],
+    ["a", "get-bracket-back-left"],
+    ["a", "get-bracket-back-right"],
+    ["a", "get-dowel"],
+    ["a", "hold-dowel"],
+    ["a", "get-back"],
+    ["a", "hold-back"],
+    ["a", "get-seat"],
+    ["a", "hold-seat"]
+]

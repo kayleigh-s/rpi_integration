@@ -1,1 +1,0 @@
-{"id": 8, "parent": null, "name": "", "combination": "sequential", "attributes": [], "children": [{"id": 9, "parent": 8, "name": "BUILD CHAIR", "combination": "sequential", "attributes": [], "children": [{"id": 10, "parent": 9, "name": "ROBOT GET(screwdriver)", "combination": "leaf", "attributes": [], "children": []}]}]}
