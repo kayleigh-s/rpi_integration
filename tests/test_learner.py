@@ -50,7 +50,7 @@ class TestLearner(unittest.TestCase):
 
     def _delete(self):
         url = self.addr + "/alpha/reset"
-        requests.delete(url=url, headers=headers)
+        requests.delete(url=url, headers=self.headers)
 
     # Compares output of learning from input file to ground truth in output file
     def _compare_from_file(self, f):
