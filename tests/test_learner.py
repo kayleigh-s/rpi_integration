@@ -56,6 +56,13 @@ class TestLearner(unittest.TestCase):
         print("Testing full chair...")
         self._compare_from_file("full_chair.json")
 
+    def test_streaming(self):
+        d1 = '[["u", "We will build a leg."], ["a", "get-dowel"]]'
+        d2 = '[["a", "get-bracket-foot]]'
+
+        print("Testing streaming...")
+        self._compare_from_string("leg_foot.json", d1, d2)
+
     def test_One(self):
         self._delete()
         data = '[["u", "We will build a chair."], ["a", "get-screwdriver"]]'
@@ -123,11 +130,11 @@ class TestLearner(unittest.TestCase):
 # print(text)
 # print
 # gt = json.loads(text)
-delete()
-with open("./in/leg_foot.json", "r") as i:
-    print("loading")
-    post(i)
-    print(get().text)
+# delete()
+# with open("./in/full_chair.json", "r") as i:
+#     print("loading")
+#     post(i)
+#     print(get().text)
 
 if __name__ == '__main__':
     unittest.main()

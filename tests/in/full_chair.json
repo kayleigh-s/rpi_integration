@@ -1,4 +1,5 @@
 [
+    ["u", "We will build a chair."],
     ["u", "I need a screwdriver to assemble a chair."],
     ["a", "get-screwdriver"],
     ["u", "First, we will build the front leg of the chair."],
@@ -42,7 +43,6 @@
     ["u", "First, we assemble the top of the back."],
     ["a", "get-top-bracket"],
     ["a", "get-top-bracket"],
-    ["a", "get-top-dowel"],
     ["a", "get-top-dowel"],
     ["a", "hold-top-dowel"],
     ["u", "I am affixing the top brackets on the top dowel."],
