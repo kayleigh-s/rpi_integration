@@ -1,5 +1,6 @@
 import json
 import os
+import time
 import unittest
 from io import open
 
@@ -50,6 +51,7 @@ class TestLearnerUtils(unittest.TestCase):
 
     def _compare_from_string(self, f, *args):
         self._delete()
+
         for a in args:
             self._learn(a)
 
@@ -58,8 +60,6 @@ class TestLearnerUtils(unittest.TestCase):
         with open(out_path, "r") as o:
             ground_truth = json.load(o)
             output = json.loads(self._get().text)
-
-            print(ground_truth)
             print
             print(self._get().text)
 
