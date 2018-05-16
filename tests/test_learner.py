@@ -2,6 +2,7 @@ import unittest
 
 from test_learner_utils import TestLearnerUtils
 
+
 # class TestLearner(TestLearnerUtils):
 
     # def test_leg_foot(self):
@@ -19,6 +20,7 @@ from test_learner_utils import TestLearnerUtils
 
     #     print("Testing online learning...")
     #     self._compare_from_string("leg_foot.json", d1, d2)
+
 
 if __name__ == '__main__':
     unittest.main()

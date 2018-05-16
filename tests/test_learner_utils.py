@@ -5,6 +5,7 @@ import unittest
 from io import open
 
 import requests
+from task_models.json_to_htm import json_to_htm
 
 
 class TestLearnerUtils(unittest.TestCase):
@@ -36,7 +37,7 @@ class TestLearnerUtils(unittest.TestCase):
 
     # Compares output of learning from input file to ground truth in output file
     def _compare_from_file(self, f):
-        print("Testing "+f+"...")
+        print("Testing " + f + "...")
         self._delete()
 
         in_path = os.path.join(self.curdir, "in/", f)
@@ -51,7 +52,7 @@ class TestLearnerUtils(unittest.TestCase):
             self.assertEqual(ground_truth, output)
 
     def _compare_from_string(self, f, *args):
-        print("Testing "+f+"...")
+        print("Testing " + f + "...")
         self._delete()
 
         for a in args:
@@ -64,5 +65,15 @@ class TestLearnerUtils(unittest.TestCase):
             output = json.loads(self._get().text)
             print
             print(self._get().text)
+
+            self.assertEqual(ground_truth, output)
+
+    def _compare_htm_to_file(self, f):
+        out_path = os.path.join(self.curdir, "out/", f)
+        htm = json_to_htm(out_path)
+
+        with open(out_path, "r") as o:
+            ground_truth = json.load(o)
+            output = json.loads(json.dumps(htm.as_dictionary()))
 
             self.assertEqual(ground_truth, output)
