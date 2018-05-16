@@ -36,6 +36,7 @@ class TestLearnerUtils(unittest.TestCase):
 
     # Compares output of learning from input file to ground truth in output file
     def _compare_from_file(self, f):
+        print("Testing "+f+"...")
         self._delete()
 
         in_path = os.path.join(self.curdir, "in/", f)
@@ -50,6 +51,7 @@ class TestLearnerUtils(unittest.TestCase):
             self.assertEqual(ground_truth, output)
 
     def _compare_from_string(self, f, *args):
+        print("Testing "+f+"...")
         self._delete()
 
         for a in args:

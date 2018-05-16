@@ -1,20 +1,17 @@
 import unittest
 
-from TestLearnerUtils import TestLearnerUtils
+from test_learner_utils import TestLearnerUtils
 
 
-# class TestLearner(TestLearnerUtils):
+class TestLearner(TestLearnerUtils):
 
-    # def test_leg_foot(self):
-    #     print("Testing leg...")
-    #     self._compare_from_file("leg_foot.json")
+    def test_leg_foot(self):
+        self._compare_from_file("leg_foot.json")
 
     # def test_all_actions(self):
-    #     print("Testing all actions...")
     #     self._compare_from_file("all_actions.json")
 
     # def test_full_chair(self):
-    #     print("Testing full chair...")
     #     self._compare_from_file("full_chair.json")
 
     # def test_online(self):
