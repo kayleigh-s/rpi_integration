@@ -25,7 +25,7 @@ docker pull leia/agents:latest.yale
 
 ## Usage
 
-Run the compose file to turn on 3 containers and their respective services `docker-compose -f ./docker-compose.yml -p rpi_integration up`
+Run the compose file to turn on 3 containers and their respective services `docker-compose -p rpi_integration -f ./docker-compose.yml up`
 
 After the docker containers are opened, you can query things via `curl` in a terminal window.
 
@@ -43,18 +43,8 @@ Example of sequences of actions and utterances:
 
 ## Testing
 
-Provide helper functions through an environment file. To use, simply run the following from within the repository.
-
-```bash
-. ./env
-```
-
-The code provides the following helpers.
-
-- `run_docker`: runs the container and exposes server port
-- `push <input json>`: sends the json file to the server
-- `get`: Gets learned tree
-- `check`: runs the desired tests (check outputs against values in `out`)
+- `docker-compose -p rpi_integration -f ./docker-compose.yml up`: runs the container and exposes server ports
+- `python -m unittest discover tests`: runs all the tests
 
 ## Available actions
 

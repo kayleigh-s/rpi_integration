@@ -3,10 +3,11 @@ import unittest
 from TestLearnerUtils import TestLearnerUtils
 
 
-class TestLearner(TestLearnerUtils):
-    def test_leg_foot(self):
-        print("Testing leg...")
-        self._compare_from_file("leg_foot.json")
+# class TestLearner(TestLearnerUtils):
+
+    # def test_leg_foot(self):
+    #     print("Testing leg...")
+    #     self._compare_from_file("leg_foot.json")
 
     # def test_all_actions(self):
     #     print("Testing all actions...")
@@ -16,13 +17,12 @@ class TestLearner(TestLearnerUtils):
     #     print("Testing full chair...")
     #     self._compare_from_file("full_chair.json")
 
-    def test_online(self):
-        d1 = '[["u", "We will build a leg."], ["a", "get-dowel"]]'
-        d2 = '[["a", "get-bracket-foot"]]'
+    # def test_online(self):
+    #     d1 = '[["u", "We will build a leg."], ["a", "get-dowel"]]'
+    #     d2 = '[["a", "get-bracket-foot"]]'
 
-        print("Testing online learning...")
-        self._compare_from_string("leg_foot.json", d1, d2)
-
+    #     print("Testing online learning...")
+    #     self._compare_from_string("leg_foot.json", d1, d2)
 
 if __name__ == '__main__':
     unittest.main()
