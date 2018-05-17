@@ -24,6 +24,8 @@ before_install:
   - docker pull leia/agents:latest.yale
 
 install:
+  - ls
+  - ls ../
   - cd ../task-models && python setup.py install --user
   - docker --version  # document the version travis is using
   # -d means detached version that runs containers on the background
