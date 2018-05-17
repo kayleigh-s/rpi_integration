@@ -24,19 +24,24 @@ class TestLearnerUtils(unittest.TestCase):
         self.maxDiff = None
 
     def _learn(self, data):
+        """Sends a POST request to learn a new HTN (or update the previous one)
+        from a sequence of actions and utterances."""
         req = requests.post(
             url=self.post_addr, data=data, headers=self.headers)
         return req
 
     def _get(self):
+        """Sends a GET request to retrieve the current HTN."""
         req = requests.get(url=self.get_addr)
         return req
 
     def _delete(self):
+        """Sends a DELETE request to reset the learning."""
         requests.delete(url=self.delete_addr, headers=self.headers)
 
-    # Compares output of learning from input file to ground truth in output file
     def _compare_from_file(self, f):
+        """Compares output of learning from input file
+        to ground truth in output file."""
         print("Testing " + f + "...")
         self._delete()
 
