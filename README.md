@@ -6,12 +6,16 @@ This repository is used to interface with the docker images developed for our in
 
 Once opened, the REST API is available on `0.0.0.0:5002`
 
-   * `/learn` -> `POST` raw JSON in the format for the learner; you can post one or more sequential inputs (utterances and actions); the response will be the HTN in JSON format (the current complete HTN, with the latest inputs included)
-   * `/alpha/gettree` -> `GET`; returns the current HTN (without modifying it):
-         * use `?format=json` to get the same response format as `/learn`
-         * use `?format=pretty` to get a human readable version
-   * `/alpha/reset` -> `DELETE`; this will clear the current tree (in lieu of killing and restarting the docker containers)
-   * `/alpha/maketree` -> deprecated, ignore this command for now
+ * `/learn` -> `POST` raw JSON in the format for the learner; you can post one or more sequential inputs (utterances and actions); the response will be the HTN in JSON format (the current complete HTN, with the latest inputs included)
+ * `/alpha/gettree` -> `GET`; returns the current HTN (without modifying it):
+   * use `?format=json` to get the same response format as `/learn`
+   * use `?format=pretty` to get a human readable version
+ * `/alpha/reset` -> `DELETE`; this will clear the current tree (in lieu of killing and restarting the docker containers)
+ * `/alpha/maketree` -> deprecated, ignore this command for now
+
+## Dependencies
+
+* `task-models`, available [here](https://github.com/ScazLab/task-models), is used to perform integration tests.
 
 ## Installation
 

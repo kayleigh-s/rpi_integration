@@ -34,7 +34,7 @@ install:
 script:
   - sleep 60
   # - docker ps -a
-  - docker network ls
+  # - docker network ls
   # - docker network inspect rpiintegration_leia
   # - ifconfig
   - python -m unittest discover rpi_integration/tests
