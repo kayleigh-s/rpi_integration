@@ -37,7 +37,7 @@ script:
   - docker network ls
   # - docker network inspect rpiintegration_leia
   # - ifconfig
-  - python -m unittest discover tests
+  - python -m unittest discover rpi_integration/tests
 
 after_script:
   - sleep 2
