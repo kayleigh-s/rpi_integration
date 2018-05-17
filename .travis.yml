@@ -37,7 +37,6 @@ script:
   # - docker network ls
   # - docker network inspect rpiintegration_leia
   # - ifconfig
-  - ls
   - python -m unittest discover tests
 
 after_script:
