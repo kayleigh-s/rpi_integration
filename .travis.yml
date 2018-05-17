@@ -25,11 +25,11 @@ before_install:
   - docker pull leia/agents:latest.yale
 
 install:
-  - cd task-models && python setup.py install --user
-  - docker --version  # document the version travis is using
+  - cd task-models && python setup.py install --user && cd $TRAVIS_BUILD_DIR
+  # - docker --version  # document the version travis is using
   # -d means detached version that runs containers on the background
   # -p is the name of the project (to uniform things)
-  - docker-compose -p rpi\_integration -f $CI_SOURCE_PATH/docker-compose.yml up -d
+  - docker-compose -p rpi\_integration -f $TRAVIS_BUILD_DIR/docker-compose.yml up -d
 
 script:
   - sleep 60
@@ -38,7 +38,7 @@ script:
   # - docker network inspect rpiintegration_leia
   # - ifconfig
   - ls
-  - python -m unittest discover rpi_integration/tests
+  - python -m unittest discover tests
 
 after_script:
   - sleep 2
