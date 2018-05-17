@@ -18,11 +18,13 @@ services:
   - docker
 
 before_install:
+  - cd ../ && git clone https://github.com/ScazLab/task-models.git
   - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
   - docker pull leia/ontosem:1.0.0
   - docker pull leia/agents:latest.yale
 
 install:
+  - cd ../task-models && python setup.py install --user
   - docker --version  # document the version travis is using
   # -d means detached version that runs containers on the background
   # -p is the name of the project (to uniform things)
