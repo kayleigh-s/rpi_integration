@@ -55,6 +55,7 @@ If you are posting an action (“a”), then the valid list includes the followi
  * `get-bracket-front`: "Get a front bracket.",
  * `get-bracket-back-right`: "Get the back bracket on the right side.",
  * `get-bracket-back-left`: "Get the back bracket on the left side.",
+  * `get-top-bracket`: "Get the top bracket.",
  * `get-dowel`: "Get a dowel.",
  * `hold-dowel`: "Hold the dowel.",
  * `release-dowel`: "Release the dowel.",
@@ -62,4 +63,4 @@ If you are posting an action (“a”), then the valid list includes the followi
  * `hold-seat`: "Hold the seat.",
  * `get-back`: "Get the back.",
  * `hold-back`: "Hold the back."
-Test suite for the ontosem docker
+
