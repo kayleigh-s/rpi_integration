@@ -6,12 +6,16 @@ This repository is used to interface with the docker images developed for our in
 
 Once opened, the REST API is available on `0.0.0.0:5002`
 
-   * `/learn` -> `POST` raw JSON in the format for the learner; you can post one or more sequential inputs (utterances and actions); the response will be the HTN in JSON format (the current complete HTN, with the latest inputs included)
-   * `/alpha/gettree` -> `GET`; returns the current HTN (without modifying it):
-         * use `?format=json` to get the same response format as `/learn`
-         * use `?format=pretty` to get a human readable version
-   * `/alpha/reset` -> `DELETE`; this will clear the current tree (in lieu of killing and restarting the docker containers)
-   * `/alpha/maketree` -> deprecated, ignore this command for now
+ * `/learn` -> `POST` raw JSON in the format for the learner; you can post one or more sequential inputs (utterances and actions); the response will be the HTN in JSON format (the current complete HTN, with the latest inputs included)
+ * `/alpha/gettree` -> `GET`; returns the current HTN (without modifying it):
+   * use `?format=json` to get the same response format as `/learn`
+   * use `?format=pretty` to get a human readable version
+ * `/alpha/reset` -> `DELETE`; this will clear the current tree (in lieu of killing and restarting the docker containers)
+ * `/alpha/maketree` -> deprecated, ignore this command for now
+
+## Dependencies
+
+* `task-models`, available [here](https://github.com/ScazLab/task-models), is used to perform integration tests.
 
 ## Installation
 
@@ -25,7 +29,7 @@ docker pull leia/agents:latest.yale
 
 ## Usage
 
-Run the compose file to turn on 3 containers and their respective services `docker-compose -f ./docker-compose.yml -p rpi_integration up`
+Run the compose file to turn on 3 containers and their respective services `docker-compose -p rpi_integration -f ./docker-compose.yml up`
 
 After the docker containers are opened, you can query things via `curl` in a terminal window.
 
@@ -43,18 +47,8 @@ Example of sequences of actions and utterances:
 
 ## Testing
 
-Provide helper functions through an environment file. To use, simply run the following from within the repository.
-
-```bash
-. ./env
-```
-
-The code provides the following helpers.
-
-- `run_docker`: runs the container and exposes server port
-- `push <input json>`: sends the json file to the server
-- `get`: Gets learned tree
-- `check`: runs the desired tests (check outputs against values in `out`)
+- `docker-compose -p rpi_integration -f ./docker-compose.yml up`: runs the container and exposes server ports
+- `python -m unittest discover tests`: runs all the tests
 
 ## Available actions
 
@@ -65,6 +59,7 @@ If you are posting an action (“a”), then the valid list includes the followi
  * `get-bracket-front`: "Get a front bracket.",
  * `get-bracket-back-right`: "Get the back bracket on the right side.",
  * `get-bracket-back-left`: "Get the back bracket on the left side.",
+  * `get-top-bracket`: "Get the top bracket.",
  * `get-dowel`: "Get a dowel.",
  * `hold-dowel`: "Hold the dowel.",
  * `release-dowel`: "Release the dowel.",
@@ -72,4 +67,4 @@ If you are posting an action (“a”), then the valid list includes the followi
  * `hold-seat`: "Hold the seat.",
  * `get-back`: "Get the back.",
  * `hold-back`: "Hold the back."
-Test suite for the ontosem docker
+

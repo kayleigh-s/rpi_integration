@@ -18,23 +18,30 @@ services:
   - docker
 
 before_install:
+  - pip install numpy --user
+  - cd ../ && git clone https://github.com/ScazLab/task-models.git
   - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
   - docker pull leia/ontosem:1.0.0
   - docker pull leia/agents:latest.yale
 
 install:
-  - docker --version  # document the version travis is using
+  - cd task-models && python setup.py install --user && cd $TRAVIS_BUILD_DIR
+  # - docker --version  # document the version travis is using
   # -d means detached version that runs containers on the background
   # -p is the name of the project (to uniform things)
-  - docker-compose -p rpi\_integration -f $CI_SOURCE_PATH/docker-compose.yml up -d
+  - docker-compose -p rpi\_integration -f $TRAVIS_BUILD_DIR/docker-compose.yml up -d
 
 script:
   - sleep 60
   # - docker ps -a
-  - docker network ls
+  # - docker network ls
   # - docker network inspect rpiintegration_leia
   # - ifconfig
-  - python ./tests/test_learner.py
+  - python -m unittest discover tests
+
+after_script:
+  - sleep 2
+
 after_success:
   - echo "Success!" # put your normal testing scripts here
   - docker-compose down
