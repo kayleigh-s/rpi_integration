@@ -14,12 +14,12 @@ class TestLearner(TestLearnerUtils):
     def test_full_chair(self):
         self._compare_from_file("full_chair.json")
 
-    # def test_online(self):
-    #     d1 = '[["u", "We will build a leg."], ["a", "get-dowel"]]'
-    #     d2 = '[["a", "get-bracket-foot"]]'
+    def test_streaming(self):
+        d1 = '[["u", "We will build a leg."], ["a", "get-dowel"]]'
+        d2 = '[["a", "get-bracket-foot"]]'
 
-    #     print("Testing online learning...")
-    #     self._compare_from_string("leg_foot.json", d1, d2)
+        print("Testing learning in streaming...")
+        self._compare_from_string("leg_foot.json", d1, d2)
 
 
 if __name__ == '__main__':
