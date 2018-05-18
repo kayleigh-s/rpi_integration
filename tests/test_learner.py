@@ -3,7 +3,7 @@ import unittest
 from test_learner_utils import TestLearnerUtils
 
 
-# class TestLearner(TestLearnerUtils):
+class TestLearner(TestLearnerUtils):
 
     # def test_leg_foot(self):
     #     self._compare_from_file("leg_foot.json")
@@ -11,8 +11,8 @@ from test_learner_utils import TestLearnerUtils
     # def test_all_actions(self):
     #     self._compare_from_file("all_actions.json")
 
-    # def test_full_chair(self):
-    #     self._compare_from_file("full_chair.json")
+    def test_full_chair(self):
+        self._compare_from_file("full_chair.json")
 
     # def test_online(self):
     #     d1 = '[["u", "We will build a leg."], ["a", "get-dowel"]]'

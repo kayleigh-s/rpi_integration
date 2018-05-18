@@ -24,7 +24,7 @@
                                 "id": 3,
                                 "parent": 2,
                                 "name": "GET(screwdriver)",
-                                "combination": "Sequential",
+                                "combination": "",
                                 "attributes": [
                                     "robot"
                                 ],
@@ -50,7 +50,7 @@
                                         "id": 6,
                                         "parent": 5,
                                         "name": "GET(FOOT_BRACKET)",
-                                        "combination": "Sequential",
+                                        "combination": "",
                                         "attributes": [
                                             "robot"
                                         ],
@@ -60,7 +60,7 @@
                                         "id": 7,
                                         "parent": 5,
                                         "name": "GET(bracket-front)",
-                                        "combination": "Sequential",
+                                        "combination": "",
                                         "attributes": [
                                             "robot"
                                         ],
@@ -70,7 +70,7 @@
                                         "id": 8,
                                         "parent": 5,
                                         "name": "GET(dowel)",
-                                        "combination": "Sequential",
+                                        "combination": "",
                                         "attributes": [
                                             "robot"
                                         ],
@@ -80,7 +80,7 @@
                                         "id": 9,
                                         "parent": 5,
                                         "name": "HOLD(dowel)",
-                                        "combination": "Sequential",
+                                        "combination": "",
                                         "attributes": [
                                             "robot"
                                         ],
@@ -90,7 +90,7 @@
                                         "id": 10,
                                         "parent": 5,
                                         "name": "FASTEN(brackets)",
-                                        "combination": "Sequential",
+                                        "combination": "",
                                         "attributes": [
                                             "human"
                                         ],
@@ -109,7 +109,7 @@
                                         "id": 13,
                                         "parent": 12,
                                         "name": "GET(FOOT_BRACKET)",
-                                        "combination": "Sequential",
+                                        "combination": "",
                                         "attributes": [
                                             "robot"
                                         ],
@@ -119,7 +119,7 @@
                                         "id": 14,
                                         "parent": 12,
                                         "name": "GET(bracket-front)",
-                                        "combination": "Sequential",
+                                        "combination": "",
                                         "attributes": [
                                             "robot"
                                         ],
@@ -129,7 +129,7 @@
                                         "id": 15,
                                         "parent": 12,
                                         "name": "GET(dowel)",
-                                        "combination": "Sequential",
+                                        "combination": "",
                                         "attributes": [
                                             "robot"
                                         ],
@@ -139,7 +139,7 @@
                                         "id": 16,
                                         "parent": 12,
                                         "name": "HOLD(dowel)",
-                                        "combination": "Sequential",
+                                        "combination": "",
                                         "attributes": [
                                             "robot"
                                         ],
@@ -149,7 +149,7 @@
                                         "id": 17,
                                         "parent": 12,
                                         "name": "FASTEN(brackets)",
-                                        "combination": "Sequential",
+                                        "combination": "",
                                         "attributes": [
                                             "human"
                                         ],
@@ -168,7 +168,7 @@
                                         "id": 20,
                                         "parent": 19,
                                         "name": "GET(FOOT_BRACKET)",
-                                        "combination": "Sequential",
+                                        "combination": "",
                                         "attributes": [
                                             "robot"
                                         ],
@@ -178,7 +178,7 @@
                                         "id": 21,
                                         "parent": 19,
                                         "name": "GET(bracket-back-right)",
-                                        "combination": "Sequential",
+                                        "combination": "",
                                         "attributes": [
                                             "robot"
                                         ],
@@ -188,7 +188,7 @@
                                         "id": 22,
                                         "parent": 19,
                                         "name": "GET(dowel)",
-                                        "combination": "Sequential",
+                                        "combination": "",
                                         "attributes": [
                                             "robot"
                                         ],
@@ -198,7 +198,7 @@
                                         "id": 23,
                                         "parent": 19,
                                         "name": "HOLD(dowel)",
-                                        "combination": "Sequential",
+                                        "combination": "",
                                         "attributes": [
                                             "robot"
                                         ],
@@ -208,7 +208,7 @@
                                         "id": 24,
                                         "parent": 19,
                                         "name": "FASTEN(brackets)",
-                                        "combination": "Sequential",
+                                        "combination": "",
                                         "attributes": [
                                             "human"
                                         ],
@@ -227,7 +227,7 @@
                                         "id": 27,
                                         "parent": 26,
                                         "name": "GET(FOOT_BRACKET)",
-                                        "combination": "Sequential",
+                                        "combination": "",
                                         "attributes": [
                                             "robot"
                                         ],
@@ -237,7 +237,7 @@
                                         "id": 28,
                                         "parent": 26,
                                         "name": "GET(bracket-back-left)",
-                                        "combination": "Sequential",
+                                        "combination": "",
                                         "attributes": [
                                             "robot"
                                         ],
@@ -247,7 +247,7 @@
                                         "id": 29,
                                         "parent": 26,
                                         "name": "GET(dowel)",
-                                        "combination": "Sequential",
+                                        "combination": "",
                                         "attributes": [
                                             "robot"
                                         ],
@@ -257,7 +257,7 @@
                                         "id": 30,
                                         "parent": 26,
                                         "name": "HOLD(dowel)",
-                                        "combination": "Sequential",
+                                        "combination": "",
                                         "attributes": [
                                             "robot"
                                         ],
@@ -267,7 +267,7 @@
                                         "id": 31,
                                         "parent": 26,
                                         "name": "FASTEN(brackets)",
-                                        "combination": "Sequential",
+                                        "combination": "",
                                         "attributes": [
                                             "human"
                                         ],
@@ -286,7 +286,7 @@
                                         "id": 34,
                                         "parent": 33,
                                         "name": "GET(seat)",
-                                        "combination": "Sequential",
+                                        "combination": "",
                                         "attributes": [
                                             "robot"
                                         ],
@@ -296,7 +296,7 @@
                                         "id": 35,
                                         "parent": 33,
                                         "name": "HOLD(seat)",
-                                        "combination": "Sequential",
+                                        "combination": "",
                                         "attributes": [
                                             "robot"
                                         ],
@@ -306,7 +306,7 @@
                                         "id": 36,
                                         "parent": 33,
                                         "name": "FASTEN(legs)",
-                                        "combination": "Sequential",
+                                        "combination": "",
                                         "attributes": [
                                             "human"
                                         ],
@@ -331,7 +331,7 @@
                                 "attributes": [],
                                 "children": [
                                     {
-                                        "id": 66,
+                                        "id": 67,
                                         "parent": 39,
                                         "name": "Parallelized Subtasks of BUILD TOP-OF-OBJECT",
                                         "combination": "Parallel",
@@ -339,7 +339,7 @@
                                         "children": [
                                             {
                                                 "id": 40,
-                                                "parent": 66,
+                                                "parent": 67,
                                                 "name": "GET(bracket-top)",
                                                 "combination": "",
                                                 "attributes": [
@@ -349,7 +349,7 @@
                                             },
                                             {
                                                 "id": 41,
-                                                "parent": 66,
+                                                "parent": 67,
                                                 "name": "GET(bracket-top)",
                                                 "combination": "",
                                                 "attributes": [
@@ -363,7 +363,7 @@
                                         "id": 42,
                                         "parent": 39,
                                         "name": "GET(dowel-top)",
-                                        "combination": "Sequential",
+                                        "combination": "",
                                         "attributes": [
                                             "robot"
                                         ],
@@ -373,7 +373,7 @@
                                         "id": 43,
                                         "parent": 39,
                                         "name": "HOLD(dowel)",
-                                        "combination": "Sequential",
+                                        "combination": "",
                                         "attributes": [
                                             "robot"
                                         ],
@@ -383,7 +383,7 @@
                                         "id": 44,
                                         "parent": 39,
                                         "name": "FASTEN(brackets)",
-                                        "combination": "Sequential",
+                                        "combination": "",
                                         "attributes": [
                                             "human"
                                         ],
@@ -409,7 +409,7 @@
                                                 "id": 48,
                                                 "parent": 47,
                                                 "name": "GET(dowel)",
-                                                "combination": "Sequential",
+                                                "combination": "",
                                                 "attributes": [
                                                     "robot"
                                                 ],
@@ -419,7 +419,7 @@
                                                 "id": 49,
                                                 "parent": 47,
                                                 "name": "HOLD(dowel)",
-                                                "combination": "Sequential",
+                                                "combination": "",
                                                 "attributes": [
                                                     "robot"
                                                 ],
@@ -429,7 +429,7 @@
                                                 "id": 50,
                                                 "parent": 47,
                                                 "name": "INSERT(dowel)",
-                                                "combination": "Sequential",
+                                                "combination": "",
                                                 "attributes": [
                                                     "human"
                                                 ],
@@ -448,7 +448,7 @@
                                                 "id": 53,
                                                 "parent": 52,
                                                 "name": "GET(dowel)",
-                                                "combination": "Sequential",
+                                                "combination": "",
                                                 "attributes": [
                                                     "robot"
                                                 ],
@@ -458,7 +458,7 @@
                                                 "id": 54,
                                                 "parent": 52,
                                                 "name": "HOLD(dowel)",
-                                                "combination": "Sequential",
+                                                "combination": "",
                                                 "attributes": [
                                                     "robot"
                                                 ],
@@ -468,7 +468,7 @@
                                                 "id": 55,
                                                 "parent": 52,
                                                 "name": "INSERT(dowel)",
-                                                "combination": "Sequential",
+                                                "combination": "",
                                                 "attributes": [
                                                     "human"
                                                 ],
@@ -487,7 +487,7 @@
                                                 "id": 58,
                                                 "parent": 57,
                                                 "name": "GET(back)",
-                                                "combination": "Sequential",
+                                                "combination": "",
                                                 "attributes": [
                                                     "robot"
                                                 ],
@@ -497,7 +497,7 @@
                                                 "id": 59,
                                                 "parent": 57,
                                                 "name": "HOLD(back)",
-                                                "combination": "Sequential",
+                                                "combination": "",
                                                 "attributes": [
                                                     "robot"
                                                 ],
@@ -507,7 +507,7 @@
                                                 "id": 60,
                                                 "parent": 57,
                                                 "name": "FASTEN(back)",
-                                                "combination": "Sequential",
+                                                "combination": "",
                                                 "attributes": [
                                                     "human"
                                                 ],
@@ -528,7 +528,7 @@
                                         "id": 63,
                                         "parent": 62,
                                         "name": "HOLD(back)",
-                                        "combination": "Sequential",
+                                        "combination": "",
                                         "attributes": [
                                             "robot"
                                         ],
@@ -538,7 +538,7 @@
                                         "id": 64,
                                         "parent": 62,
                                         "name": "FASTEN(brackets)",
-                                        "combination": "Sequential",
+                                        "combination": "",
                                         "attributes": [
                                             "human"
                                         ],

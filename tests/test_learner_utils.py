@@ -49,6 +49,7 @@ class TestLearnerUtils(unittest.TestCase):
         out_path = os.path.join(self.curdir, "out/", f)
 
         with open(in_path, "r") as i, open(out_path, "r") as o:
+            # print(i.read())
             self._learn(i)
 
             ground_truth = json.load(o)
