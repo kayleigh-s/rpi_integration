@@ -1,1 +1,40 @@
-{"nodes": {"id": 0, "parent": null, "name": "Start", "combination": "Sequential", "attributes": [], "children": [{"id": 1, "parent": 0, "name": "BUILD ARTIFACT-LEG", "combination": "Sequential", "attributes": [], "children": [{"id": 2, "parent": 1, "name": "ROBOT GET(dowel)", "combination": "Sequential", "attributes": [], "children": []}, {"id": 3, "parent": 1, "name": "ROBOT GET(FOOT_BRACKET)", "combination": "Sequential", "attributes": [], "children": []}]}]}}
+{
+    "nodes": {
+        "id": 0,
+        "parent": null,
+        "name": "Start",
+        "combination": "Sequential",
+        "attributes": [],
+        "children": [
+            {
+                "id": 1,
+                "parent": 0,
+                "name": "BUILD ARTIFACT-LEG",
+                "combination": "Sequential",
+                "attributes": [],
+                "children": [
+                    {
+                        "id": 2,
+                        "parent": 1,
+                        "name": "GET(dowel)",
+                        "combination": "",
+                        "attributes": [
+                            "robot"
+                        ],
+                        "children": []
+                    },
+                    {
+                        "id": 3,
+                        "parent": 1,
+                        "name": "GET(FOOT_BRACKET)",
+                        "combination": "",
+                        "attributes": [
+                            "robot"
+                        ],
+                        "children": []
+                    }
+                ]
+            }
+        ]
+    }
+}
