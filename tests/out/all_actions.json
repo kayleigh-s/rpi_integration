@@ -1,2 +1,169 @@
-
-{"nodes": {"id": 0, "parent": null, "name": "Start", "combination": "Sequential", "attributes": [], "children": [{"id": 1, "parent": 0, "name": "BUILD CHAIR", "combination": "Sequential", "attributes": [], "children": [{"id": 2, "parent": 1, "name": "ROBOT GET(screwdriver)", "combination": "Sequential", "attributes": [], "children": []}, {"id": 3, "parent": 1, "name": "ROBOT GET(FOOT_BRACKET)", "combination": "Sequential", "attributes": [], "children": []}, {"id": 18, "parent": 1, "name": "Parallelized Subtasks of BUILD CHAIR", "combination": "Sequential", "attributes": [], "children": [{"id": 4, "parent": 18, "name": "ROBOT GET(bracket)", "combination": "Parallel", "attributes": [], "children": []}, {"id": 5, "parent": 18, "name": "ROBOT GET(bracket)", "combination": "Parallel", "attributes": [], "children": []}, {"id": 6, "parent": 18, "name": "ROBOT GET(bracket)", "combination": "Parallel", "attributes": [], "children": []}]}, {"id": 7, "parent": 1, "name": "ROBOT GET(dowel)", "combination": "Sequential", "attributes": [], "children": []}, {"id": 8, "parent": 1, "name": "ROBOT HOLD(dowel)", "combination": "Sequential", "attributes": [], "children": []}, {"id": 9, "parent": 1, "name": "ROBOT GET(back)", "combination": "Sequential", "attributes": [], "children": []}, {"id": 10, "parent": 1, "name": "ROBOT HOLD(back)", "combination": "Sequential", "attributes": [], "children": []}, {"id": 11, "parent": 1, "name": "ROBOT GET(seat)", "combination": "Sequential", "attributes": [], "children": []}, {"id": 19, "parent": 1, "name": "Parallelized Subtasks of BUILD CHAIR", "combination": "Sequential", "attributes": [], "children": [{"id": 12, "parent": 19, "name": "ROBOT HOLD(seat)", "combination": "Parallel", "attributes": [], "children": []}, {"id": 13, "parent": 19, "name": "ROBOT GET(bracket)", "combination": "Parallel", "attributes": [], "children": []}, {"id": 14, "parent": 19, "name": "ROBOT GET(dowel)", "combination": "Parallel", "attributes": [], "children": []}, {"id": 15, "parent": 19, "name": "ROBOT HOLD(dowel)", "combination": "Parallel", "attributes": [], "children": []}]}]}]}}
+{
+    "nodes": {
+        "id": 0,
+        "parent": null,
+        "name": "Start",
+        "combination": "Sequential",
+        "attributes": [],
+        "children": [
+            {
+                "id": 1,
+                "parent": 0,
+                "name": "BUILD CHAIR",
+                "combination": "Sequential",
+                "attributes": [],
+                "children": [
+                    {
+                        "id": 2,
+                        "parent": 1,
+                        "name": "GET(screwdriver)",
+                        "combination": "",
+                        "attributes": [
+                            "robot"
+                        ],
+                        "children": []
+                    },
+                    {
+                        "id": 3,
+                        "parent": 1,
+                        "name": "GET(FOOT_BRACKET)",
+                        "combination": "",
+                        "attributes": [
+                            "robot"
+                        ],
+                        "children": []
+                    },
+                    {
+                        "id": 4,
+                        "parent": 1,
+                        "name": "GET(bracket-front)",
+                        "combination": "",
+                        "attributes": [
+                            "robot"
+                        ],
+                        "children": []
+                    },
+                    {
+                        "id": 5,
+                        "parent": 1,
+                        "name": "GET(bracket-back-left)",
+                        "combination": "",
+                        "attributes": [
+                            "robot"
+                        ],
+                        "children": []
+                    },
+                    {
+                        "id": 6,
+                        "parent": 1,
+                        "name": "GET(bracket-back-right)",
+                        "combination": "",
+                        "attributes": [
+                            "robot"
+                        ],
+                        "children": []
+                    },
+                    {
+                        "id": 7,
+                        "parent": 1,
+                        "name": "GET(dowel)",
+                        "combination": "",
+                        "attributes": [
+                            "robot"
+                        ],
+                        "children": []
+                    },
+                    {
+                        "id": 8,
+                        "parent": 1,
+                        "name": "HOLD(dowel)",
+                        "combination": "",
+                        "attributes": [
+                            "robot"
+                        ],
+                        "children": []
+                    },
+                    {
+                        "id": 9,
+                        "parent": 1,
+                        "name": "GET(back)",
+                        "combination": "",
+                        "attributes": [
+                            "robot"
+                        ],
+                        "children": []
+                    },
+                    {
+                        "id": 10,
+                        "parent": 1,
+                        "name": "HOLD(back)",
+                        "combination": "",
+                        "attributes": [
+                            "robot"
+                        ],
+                        "children": []
+                    },
+                    {
+                        "id": 11,
+                        "parent": 1,
+                        "name": "GET(seat)",
+                        "combination": "",
+                        "attributes": [
+                            "robot"
+                        ],
+                        "children": []
+                    },
+                    {
+                        "id": 12,
+                        "parent": 1,
+                        "name": "HOLD(seat)",
+                        "combination": "",
+                        "attributes": [
+                            "robot"
+                        ],
+                        "children": []
+                    },
+                    {
+                        "id": 13,
+                        "parent": 1,
+                        "name": "GET(bracket-top)",
+                        "combination": "",
+                        "attributes": [
+                            "robot"
+                        ],
+                        "children": []
+                    },
+                    {
+                        "id": 17,
+                        "parent": 1,
+                        "name": "Parallelized Subtasks of BUILD CHAIR",
+                        "combination": "Parallel",
+                        "attributes": [],
+                        "children": [
+                            {
+                                "id": 14,
+                                "parent": 17,
+                                "name": "GET(dowel-top)",
+                                "combination": "",
+                                "attributes": [
+                                    "robot"
+                                ],
+                                "children": []
+                            },
+                            {
+                                "id": 15,
+                                "parent": 17,
+                                "name": "HOLD(dowel)",
+                                "combination": "",
+                                "attributes": [
+                                    "robot"
+                                ],
+                                "children": []
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+}

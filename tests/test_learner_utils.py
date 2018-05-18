@@ -69,7 +69,6 @@ class TestLearnerUtils(unittest.TestCase):
         with open(out_path, "r") as o:
             ground_truth = json.load(o)
             output = json.loads(self._get().text)
-            print
             print(self._get().text)
 
             self.assertEqual(ground_truth, output)

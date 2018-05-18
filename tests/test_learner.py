@@ -8,8 +8,8 @@ class TestLearner(TestLearnerUtils):
     # def test_leg_foot(self):
     #     self._compare_from_file("leg_foot.json")
 
-    # def test_all_actions(self):
-    #     self._compare_from_file("all_actions.json")
+    def test_all_actions(self):
+        self._compare_from_file("all_actions.json")
 
     def test_full_chair(self):
         self._compare_from_file("full_chair.json")
