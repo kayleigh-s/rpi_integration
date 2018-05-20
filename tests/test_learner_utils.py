@@ -1,8 +1,10 @@
+import ast
 import json
 import os
 import time
 import unittest
 from io import open
+import numpy as np
 
 import requests
 from task_models.json_to_htm import json_to_htm
@@ -73,11 +75,32 @@ class TestLearnerUtils(unittest.TestCase):
             self.assertEqual(ground_truth, output)
 
     def _compare_htm_to_file(self, f):
+        self._delete()
+
         out_path = os.path.join(self.curdir, "out/", f)
         htm = json_to_htm(out_path)
 
         with open(out_path, "r") as o:
             ground_truth = json.load(o)
             output = json.loads(json.dumps(htm.as_dictionary()))
+
+            self.assertEqual(ground_truth, output)
+
+    def _compare_from_file_streaming(self, f):
+        self._delete()
+
+        in_path = os.path.join(self.curdir, "in/", f)
+        out_path = os.path.join(self.curdir, "out/", f)
+
+        with open(in_path, 'r') as i, open(out_path, 'r') as o:
+            ground_truth = json.load(o)
+
+            cmds = ast.literal_eval(i.read())
+            for c in cmds:
+                cmd = '[[\"{}\", \"{}\"]]'.format(c[0], c[1])
+                self._learn(cmd)
+
+            print(self._get().text)
+            output = json.loads(self._get().text)
 
             self.assertEqual(ground_truth, output)
