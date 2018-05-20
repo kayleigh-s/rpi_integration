@@ -109,17 +109,24 @@ class HTMController(BaseController):
             same_arm = prev_arm == arm
             elapsed_time = time.time() - self.strt_time
 
-            if prev_arm == arm:
-                rospy.loginfo("Waiting on last action..")
-                last_r.wait_result()
+            # if same_arm:
+            #     try:
+            #         for t in threading.enumerate():
+            #             t.join()
+            #     except RuntimeError:
+            #         pass
 
-            rospy.loginfo(
+            rospy.loginfo("Same arm: {}".format(prev_arm == arm))
+            # if prev_arm == arm:
+            #     rospy.loginfo("Waiting on last action..")
+            #     last_r.wait_result()
+
+            last_r = self._action(arm, (cmd, [idx]), {'wait': False})
+            print(
                 "Taking action {} on object {} with {} arm at time {}".format(cmd,
                                                                               idx,
                                                                               arm_str,
                                                                               elapsed_time))
-            rospy.loginfo("Same arm: {}".format(prev_arm == arm))
-            last_r = self._action(arm, (cmd, [idx]), {'wait': False})
             prev_arm = arm
 
 
