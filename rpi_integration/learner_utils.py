@@ -1,25 +1,32 @@
 #!/usr/bin/env python
 import requests
 
-HEADER = {
-    'Content-Type': 'application/json',
-    'Accept': 'application/json',
-}
 
+class RESTUtils(object):
+    def __init__(self):
+        "docstring"
+        addr = "http://0.0.0.0:5002"
 
-def learn(data, post_addr):
-    """Sends a POST request to learn a new HTN (or update the previous one)
-    from a sequence of actions and utterances."""
-    req = requests.post(url=post_addr, data=data, headers=HEADER)
-    return req
+        self.post_addr = addr + "/learn"
+        self.delete_addr = addr + "/alpha/reset"
+        self.get_addr = addr + "/alpha/gettree?format=json"
 
+        self.HEADER = {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+        }
 
-def get(get_addr):
-    """Sends a GET request to retrieve the current HTN."""
-    req = requests.get(url=get_addr)
-    return req
+    def learn(self, data):
+        """Sends a POST request to learn a new HTN (or update the previous one)
+        from a sequence of actions and utterances."""
+        req = requests.post(url=self.post_addr, data=data, headers=self.HEADER)
+        return req
 
+    def get(self):
+        """Sends a GET request to retrieve the current HTN."""
+        req = requests.get(url=self.get_addr)
+        return req
 
-def delete(delete_addr):
-    """Sends a DELETE request to reset the learning."""
-    requests.delete(url=delete_addr, headers=HEADER)
+    def delete(self):
+        """Sends a DELETE request to reset the learning."""
+        requests.delete(url=self.delete_addr, headers=self.HEADER)
