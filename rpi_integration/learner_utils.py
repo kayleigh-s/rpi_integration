@@ -4,7 +4,7 @@ import requests
 
 class RESTUtils(object):
     def __init__(self):
-        "docstring"
+        """REST API for interfacing with learner"""
         addr = "http://0.0.0.0:5002"
 
         self.post_addr = addr + "/learn"
