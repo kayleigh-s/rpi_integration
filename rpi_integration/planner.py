@@ -19,7 +19,7 @@ parser.add_argument(
 
 
 class HTMController(BaseController):
-    "Controls Baxter using HTN derived from json"
+    """Controls Baxter using HTN derived from json"""
 
     strt_time = time.time()
 
@@ -50,7 +50,6 @@ class HTMController(BaseController):
 
     def __init__(self, json_path):
         self.htm = json_to_htm(json_path)
-        self.prev_arm = None
         self.last_r = finished_request
         super(HTMController, self).__init__(
             left=True,
@@ -60,75 +59,29 @@ class HTMController(BaseController):
             recovery=True,
         )
 
-
     @property
     def robot_actions(self):
-        return list(self._get_actions(self.htm.root))
-
-
-    def take_action(self,act):
-        cmd, arm, idx = self._parse_action(act)
-        arm_str = "LEFT" if arm == 0 else 'RIGHT'
-        same_arm = self.prev_arm == arm
-        elapsed_time = time.time() - self.strt_time
-        #rospy.loginfo("Num threads {}".format(threading.current_thread()))
-
-        # if self.prev_arm == arm:
-        #     rospy.loginfo("Waiting on last action..")
-        #     self.last_r.wait_result()
-        #     rospy.loginfo("Last Action finished: {}".format(self.last_r.finished))
-        # if self.prev_arm == arm and arm == BaseController.LEFT:
-        #     rospy.loginfo("Waiting on left..")
-        #     self._last_action_right_request.wait_result()
-        # elif self.prev_arm == arm and arm == BaseController.RIGHT:
-        #     rospy.loginfo("Waiting on right..")
-        #     self._last_action_left_request.wait_result()
-        # if self.prev_arm == None:
-        #     self.prev_arm = arm
-
-        # while(not self.last_r.finished):
-        #     rospy.loginfo("NOT FINISHED")
-        #     rospy.sleep(.1)
-
-        rospy.loginfo("Taking action {} on object {} with {} arm at time {}".format(cmd,
-                                                                                    idx,
-                                                                                    arm_str,
-                                                                                    elapsed_time))
-        rospy.loginfo("Same arm: {}".format(self.prev_arm == arm))
-        self.prev_arm = arm
-        return self._action(arm, (cmd, [idx]), {'wait': False})
-
-
+        return self._get_actions(self.htm.root)
 
     def take_actions(self):
-        last_r = finished_request
-        prev_arm = 2
         for a in self.robot_actions:
-            cmd, arm, idx = self._parse_action(a)
+            cmd, arm, obj = self._parse_action(a)
             arm_str = "LEFT" if arm == 0 else 'RIGHT'
-            same_arm = prev_arm == arm
+
             elapsed_time = time.time() - self.strt_time
-
-            # if same_arm:
-            #     try:
-            #         for t in threading.enumerate():
-            #             t.join()
-            #     except RuntimeError:
-            #         pass
-
-            rospy.loginfo("Same arm: {}".format(prev_arm == arm))
-            # if prev_arm == arm:
-            #     rospy.loginfo("Waiting on last action..")
-            #     last_r.wait_result()
-
-            last_r = self._action(arm, (cmd, [idx]), {'wait': False})
-            print(
+            rospy.loginfo(
                 "Taking action {} on object {} with {} arm at time {}".format(cmd,
-                                                                              idx,
+                                                                              obj,
                                                                               arm_str,
                                                                               elapsed_time))
-            prev_arm = arm
+            self._action(arm, (cmd, [obj]), {'wait': False})
 
+            elapsed_time = time.time() - self.strt_time
+            rospy.loginfo(
+                "Took action {} on object {} with {} arm at time {}".format(cmd,
+                                                                            obj,
+                                                                            arm_str,
+                                                                            elapsed_time))
 
     def _run(self):
         rospy.loginfo('Starting autonomous control')
@@ -137,9 +90,9 @@ class HTMController(BaseController):
         #     r = self.take_action(a)
 
     def _get_actions(self, root):
-        "Recursively retrieves actions in correct order"
+        """ Recursively retrieves actions in correct order """
         name = root.name
-        kind = root.kind
+        kind = root.kind # we're not evil
 
         try:
             children = root.children
@@ -156,13 +109,18 @@ class HTMController(BaseController):
                 yield name
 
     def _parse_action(self, act):
+        """ Parses actions in rpi notation (e.g. GET(dowel)) and converts them
+            into human_robot_collaboration compatible actions (e.g. get_pass [13, 25])
 
+        :param act: the action in rpi notation
+        :return: the command, the arm, the object to control
+        """
         try:
-            cmd, arm, idx = self.OBJECT_DICT[act].pop()
+            cmd, arm, obj = self.OBJECT_DICT[act].pop()
         except AttributeError: # Can only pop if its a list
-            cmd, arm, idx = self.OBJECT_DICT[act]
+            cmd, arm, obj = self.OBJECT_DICT[act]
 
-        return cmd, arm, idx
+        return cmd, arm, obj
 
 try:
     args = parser.parse_args()
