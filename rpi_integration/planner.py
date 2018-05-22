@@ -64,9 +64,23 @@ class HTMController(BaseController):
         return self._get_actions(self.htm.root)
 
     def take_actions(self):
+        prev_arm = None # was left or right arm used previously?
+        same_arm = True # Was previous action taken using the same arm as curr action?
+        prev_same_arm = True # Was the previous previous action taken using same arm?
+
         for a in self.robot_actions:
             cmd, arm, obj = self._parse_action(a)
             arm_str = "LEFT" if arm == 0 else 'RIGHT'
+
+            prev_same_arm = same_arm == prev_same_arm
+            same_arm = True if prev_arm == None else prev_arm == arm
+
+            rospy.loginfo("same arm {}, last same arm {}".format(same_arm,prev_same_arm))
+
+            # Only sleep when encountering diff arms for first time.
+            # prevents both arms from acting simultaneously.
+            if  not same_arm and prev_same_arm:
+                rospy.sleep(3)
 
             elapsed_time = time.time() - self.strt_time
             rospy.loginfo(
@@ -74,6 +88,7 @@ class HTMController(BaseController):
                                                                               obj,
                                                                               arm_str,
                                                                               elapsed_time))
+            # Send action to the robot
             self._action(arm, (cmd, [obj]), {'wait': False})
 
             elapsed_time = time.time() - self.strt_time
@@ -82,12 +97,11 @@ class HTMController(BaseController):
                                                                             obj,
                                                                             arm_str,
                                                                             elapsed_time))
+            prev_arm = arm
 
     def _run(self):
         rospy.loginfo('Starting autonomous control')
         self.take_actions()
-        # for a in self.robot_actions:
-        #     r = self.take_action(a)
 
     def _get_actions(self, root):
         """ Recursively retrieves actions in correct order """
