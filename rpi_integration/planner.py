@@ -10,6 +10,8 @@ from task_models.json_to_htm import json_to_htm
 from human_robot_collaboration.controller import BaseController
 from human_robot_collaboration.service_request import finished_request
 
+from rpi_integration.learner_utils import parse_action
+
 
 parser = argparse.ArgumentParser("Run the autonomous HTM controller")
 parser.add_argument(
@@ -43,14 +45,15 @@ class HTMController(BaseController):
         "GET(bracket-back-left)": (BRING, BaseController.RIGHT, 19),
         "GET(screwdriver)": (BRING, BaseController.RIGHT, 20),
         "HOLD(dowel)": (HOLD_LEG, BaseController.RIGHT, 0),
-        "HOLD(seat)": (HOLD_TOP, BaseController.RIGHT, 0),
-        "HOLD(back)": (HOLD_TOP, BaseController.RIGHT, 0)
+        "HOLD(seat)": (HOLD_LEG, BaseController.RIGHT, 0),
+        "HOLD(back)": (HOLD_LEG, BaseController.RIGHT, 0)
 
     }
 
     def __init__(self, json_path):
         self.htm = json_to_htm(json_path)
         self.last_r = finished_request
+        self.voice = voice
         super(HTMController, self).__init__(
             left=True,
             right=True,
@@ -63,13 +66,13 @@ class HTMController(BaseController):
     def robot_actions(self):
         return self._get_actions(self.htm.root)
 
-    def take_actions(self):
+    def _take_actions(self):
         prev_arm = None # was left or right arm used previously?
         same_arm = True # Was previous action taken using the same arm as curr action?
         prev_same_arm = True # Was the previous previous action taken using same arm?
 
         for a in self.robot_actions:
-            cmd, arm, obj = self._parse_action(a)
+            cmd, arm, obj = parse_action(a, self.OBJECT_DICT)
             arm_str = "LEFT" if arm == 0 else 'RIGHT'
 
             prev_same_arm = same_arm == prev_same_arm
@@ -80,7 +83,7 @@ class HTMController(BaseController):
             # Only sleep when encountering diff arms for first time.
             # prevents both arms from acting simultaneously.
             if  not same_arm and prev_same_arm:
-                rospy.sleep(3)
+                rospy.sleep(7)
 
             elapsed_time = time.time() - self.strt_time
             rospy.loginfo(
@@ -99,9 +102,11 @@ class HTMController(BaseController):
                                                                             elapsed_time))
             prev_arm = arm
 
+
     def _run(self):
         rospy.loginfo('Starting autonomous control')
-        self.take_actions()
+        rospy.sleep(3) # Add a little delay for self-filming!
+        self._take_actions()
 
     def _get_actions(self, root):
         """ Recursively retrieves actions in correct order """
@@ -122,19 +127,6 @@ class HTMController(BaseController):
             if root.action.agent == 'robot':
                 yield name
 
-    def _parse_action(self, act):
-        """ Parses actions in rpi notation (e.g. GET(dowel)) and converts them
-            into human_robot_collaboration compatible actions (e.g. get_pass [13, 25])
-
-        :param act: the action in rpi notation
-        :return: the command, the arm, the object to control
-        """
-        try:
-            cmd, arm, obj = self.OBJECT_DICT[act].pop()
-        except AttributeError: # Can only pop if its a list
-            cmd, arm, obj = self.OBJECT_DICT[act]
-
-        return cmd, arm, obj
 
 try:
     args = parser.parse_args()
