@@ -331,7 +331,7 @@
                                 "attributes": [],
                                 "children": [
                                     {
-                                        "id": 67,
+                                        "id": 63,
                                         "parent": 39,
                                         "name": "Parallelized Subtasks of BUILD TOP-OF-OBJECT",
                                         "combination": "Parallel",
@@ -339,7 +339,7 @@
                                         "children": [
                                             {
                                                 "id": 40,
-                                                "parent": 67,
+                                                "parent": 63,
                                                 "name": "GET(bracket-top)",
                                                 "combination": "",
                                                 "attributes": [
@@ -349,7 +349,7 @@
                                             },
                                             {
                                                 "id": 41,
-                                                "parent": 67,
+                                                "parent": 63,
                                                 "name": "GET(bracket-top)",
                                                 "combination": "",
                                                 "attributes": [
@@ -496,16 +496,6 @@
                                             {
                                                 "id": 59,
                                                 "parent": 57,
-                                                "name": "HOLD(back)",
-                                                "combination": "",
-                                                "attributes": [
-                                                    "robot"
-                                                ],
-                                                "children": []
-                                            },
-                                            {
-                                                "id": 60,
-                                                "parent": 57,
                                                 "name": "FASTEN(back)",
                                                 "combination": "",
                                                 "attributes": [
@@ -518,25 +508,15 @@
                                 ]
                             },
                             {
-                                "id": 62,
+                                "id": 60,
                                 "parent": 38,
                                 "name": "FASTEN TOP ARTIFACTs TO BACK-OF-OBJECT",
                                 "combination": "Sequential",
                                 "attributes": [],
                                 "children": [
                                     {
-                                        "id": 63,
-                                        "parent": 62,
-                                        "name": "HOLD(back)",
-                                        "combination": "",
-                                        "attributes": [
-                                            "robot"
-                                        ],
-                                        "children": []
-                                    },
-                                    {
-                                        "id": 64,
-                                        "parent": 62,
+                                        "id": 61,
+                                        "parent": 60,
                                         "name": "FASTEN(brackets)",
                                         "combination": "",
                                         "attributes": [
