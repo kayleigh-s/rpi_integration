@@ -2,7 +2,7 @@
 import requests
 
 
-def parse_action(self, act, obj_dict):
+def parse_action(act, obj_dict):
     """ Parses actions in rpi notation (e.g. GET(dowel)) and converts them
       into human_robot_collaboration compatible actions (e.g. get_pass [13, 25])
 
@@ -11,10 +11,11 @@ def parse_action(self, act, obj_dict):
         """
     try:
         cmd, arm, obj = obj_dict[act].pop()
-    except AttributeError: # Can only pop if its a list
+    except AttributeError:  # Can only pop if its a list
         cmd, arm, obj = obj_dict[act]
 
     return cmd, arm, obj
+
 
 class RESTUtils(object):
     def __init__(self):

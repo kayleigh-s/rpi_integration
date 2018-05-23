@@ -53,7 +53,6 @@ class HTMController(BaseController):
     def __init__(self, json_path):
         self.htm = json_to_htm(json_path)
         self.last_r = finished_request
-        self.voice = voice
         super(HTMController, self).__init__(
             left=True,
             right=True,
