@@ -2,11 +2,14 @@
 import argparse
 import ast
 import os
+from threading import Lock
 
 from task_models.json_to_htm import json_to_htm
 
 import rospy
 from human_robot_collaboration.controller import BaseController
+from human_robot_collaboration.subscribers import CommunicationSubscriber
+from ros_speech2text.msg import transcript
 from rpi_integration.learner_utils import RESTUtils, parse_action
 from std_msgs.msg import String
 
@@ -18,14 +21,15 @@ parser.add_argument(
         os.path.abspath(os.path.dirname(__file__)),
         "../tests/in/full_chair.json"))
 
-
 class StreamingController(RESTUtils, BaseController):
 
     BRING = 'get_pass'
     HOLD_TOP = 'hold_top'
     HOLD_LEG ='hold_leg'
 
-    ACTION_DICT = {
+    WEB_TOPIC = '/web_interface/pressed'
+
+    OBJECT_DICT = {
         "get-seat": (BRING, BaseController.LEFT, 198),
         "get-back": (BRING, BaseController.LEFT, 201),
         "get-dowel":  [(BRING, BaseController.LEFT, 150), (BRING, BaseController.LEFT, 151),
@@ -50,16 +54,22 @@ class StreamingController(RESTUtils, BaseController):
         """
         Trains learner incrementally from file and sends actions to robot as they occur.
         """
-        super(RESTUtils, self).__init__()
-        super(BaseController, self).__init__(left=True, right=True, speech=False,
+        RESTUtils.__init__(self)
+        BaseController.__init__(self, left=True, right=True, speech=False,
                                              listen=True, recovery=True)
-        "Publishes learning incrementally from by streaming data from input file"
-
+        self._lock = Lock()
         self.infile = infile
 
-        rospy.init_node('streaming_pub')
-        self.learner_pub = rospy.Publisher(
-            'web_interface/json', String, queue_size=10)
+        self.learner_pub = rospy.Publisher('web_interface/json', String, queue_size=10)
+
+        # Gets button presses from web interface.
+        self._web_sub = rospy.Subscriber(self.WEB_TOPIC, String, self._web_cb)
+        self._listen_sub = rospy.Subscriber(self.LISTEN_TOPIC, transcript, self._listen_cb)
+
+        # Track if we have received a msg from above topics
+        self._web_flag = False
+        self._listen_flag = False
+
 
     def run(self):
         self.delete() # delete any left over learning
@@ -68,32 +78,52 @@ class StreamingController(RESTUtils, BaseController):
             cmds = ast.literal_eval(i.read()) # transform string input into list
             cmds_iter = iter(cmds) # Allows finer control over how we access cmds
             try:
+
                 while not self.finished:
-                    # Wait for voice to be recognized
-                    if self.listen_sub.wait_for_msg(timeout=20.):
-                        line = cmds.next() # Get line of data
+                    if self._listen_flag or self._web_flag:
+
+                        rospy.loginfo("Utterance or button press received")
+                        line = cmds_iter.next() # Get line of data
                         data_type = line[0] # action or utterance?
                         data = line[1] # What was done/said?
 
                         # Format data for learner and post
                         for_learner = '[[\"{}\", \"{}\"]]'.format(data_type, data)
-                        self.learn(cmd)
+                        rospy.loginfo("Sending to leaner: {}".format(for_learner))
+                        self.learn(data)
 
                         # If data is action, have robot do it!
                         if data_type == 'a':
-                            cmd, arm, obj = self.parse_action(data, self.OBJECT_DICT)
+                            cmd, arm, obj = parse_action(data, self.OBJECT_DICT)
+
+                            rospy.loginfo("Taking action {} on object {}".format(cmd, obj))
                             self._action(arm, (cmd, [obj]), {'wait': True})
 
                         # Publish results of learning
-                        htm_so_far = get(self.get_addr).text
+                        htm_so_far = self.get().text
                         self.learner_pub.publish(htm_so_far)
+
+                        # reset flags and in order to get next msg
+                        with self._lock:
+                            self._web_flag = False
+                            self._listen_flag = False
+
             except StopIteration: # Happens once we reach end of iter
                 return
+
+    def _web_cb(self, msg):
+        with self._lock:
+            self._web_flag = True
+
+    def _listen_cb(self, msg):
+        with self._lock:
+            self._listen_flag = True
 
 
 
 args = parser.parse_args()
 streamer = StreamingController(args.path)
+
 
 try:
     streamer.run()
