@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 import requests
 
-
 def parse_action(act, obj_dict):
     """ Parses actions in rpi notation (e.g. GET(dowel)) and converts them
       into human_robot_collaboration compatible actions (e.g. get_pass [13, 25])
@@ -25,6 +24,7 @@ class RESTUtils(object):
         self.post_addr = addr + "/learn"
         self.delete_addr = addr + "/alpha/reset"
         self.get_addr = addr + "/alpha/gettree?format=json"
+        self.query_addr = addr + "/query"
 
         self.HEADER = {
             'Content-Type': 'application/json',
@@ -45,3 +45,10 @@ class RESTUtils(object):
     def delete(self):
         """Sends a DELETE request to reset the learning."""
         requests.delete(url=self.delete_addr, headers=self.HEADER)
+
+    def query(self, data):
+        """Sends a POST request to update the previous one
+        from a sequence of utterances."""
+        req = requests.post(url=self.query_addr, data=data, headers=self.HEADER)
+        return req
+
