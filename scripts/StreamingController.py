@@ -47,7 +47,10 @@ class StreamingController(RESTUtils, BaseController):
         "hold-top-dowel": (HOLD_LEG, BaseController.RIGHT, 0),
         "hold-dowel": (HOLD_LEG, BaseController.RIGHT, 0),
         "hold-back": (HOLD_LEG, BaseController.RIGHT, 0),
-        "hold-seat": (HOLD_LEG, BaseController.RIGHT, 0)
+        "hold-seat": (HOLD_LEG, BaseController.RIGHT, 0),
+        "release-dowel": ("RELEASE", "u", "Release the dowel."),
+        "release-top-dowel": ("RELEASE", "u", "Release the dowel.")
+
     }
 
     def __init__(self, infile):
@@ -87,17 +90,21 @@ class StreamingController(RESTUtils, BaseController):
                         data_type = line[0] # action or utterance?
                         data = line[1] # What was done/said?
 
-                        # Format data for learner and post
-                        for_learner = '[[\"{}\", \"{}\"]]'.format(data_type, data)
-                        rospy.loginfo("Sending to leaner: {}".format(for_learner))
-                        self.learn(data)
-
                         # If data is action, have robot do it!
                         if data_type == 'a':
                             cmd, arm, obj = parse_action(data, self.OBJECT_DICT)
 
-                            rospy.loginfo("Taking action {} on object {}".format(cmd, obj))
-                            self._action(arm, (cmd, [obj]), {'wait': True})
+                            if cmd == "RELEASE":
+                                data_type = arm
+                                data = obj
+                            else:
+                                rospy.loginfo("Taking action {} on object {}".format(cmd, obj))
+                                self._action(arm, (cmd, [obj]), {'wait': True})
+
+                        # Format data for learner and post
+                        for_learner = '[[\"{}\", \"{}\"]]'.format(data_type, data)
+                        rospy.loginfo("Sending to learner: {}".format(for_learner))
+                        self.learn(for_learner)
 
                         # Publish results of learning
                         htm_so_far = self.get().text
