@@ -83,8 +83,8 @@ class TestLearnerUtils(unittest.TestCase):
             for c in cmds:
                 cmd = '[[\"{}\", \"{}\"]]'.format(c[0], c[1])
                 self.rest_utils.learn(cmd, )
+                print(self.rest_utils.get().text)
 
-            print(self.rest_utils.get().text)
             output = json.loads(self.rest_utils.get().text)
 
             self.assertEqual(ground_truth, output)
