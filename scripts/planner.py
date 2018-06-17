@@ -1,3 +1,6 @@
+#!/usr/bin/env python
+
+
 import argparse
 import os
 import threading
@@ -34,9 +37,6 @@ class HTMController(BaseController, RESTUtils):
     HOLD_TOP = 'hold_top'
     HOLD_LEG ='hold_leg'
 
-    CHAIR_PATH = os.path.join(os.path.abspath(os.path.dirname(__file__)),
-                              "../tests/out/full_chair.json")
-
     OBJECT_DICT = {
         "GET(seat)": (BRING, BaseController.LEFT, 198),
         "GET(back)": (BRING, BaseController.LEFT, 201),
@@ -62,6 +62,7 @@ class HTMController(BaseController, RESTUtils):
         self.json_path = json_path
         self.htm = json_to_htm(json_path)
         self.last_r = finished_request
+
         BaseController.__init__(
             self,
             left=True,
@@ -88,17 +89,19 @@ class HTMController(BaseController, RESTUtils):
         same_arm = True # Was previous action taken using the same arm as curr action?
         prev_same_arm = True # Was the previous previous action taken using same arm?
 
-        rospy.loginfo('Publishing first json')
-        self._learner_pub.publish(open(self.CHAIR_PATH, 'r').read())
-        rospy.sleep(5)
-        rospy.loginfo('Publishing second json')
+        # Publishing the htm before anything
         self._learner_pub.publish(open(self.json_path, 'r').read())
-        for a in actions:
+
+        for action in actions:
+            a = action.name # From the name we can get correct ROS service
             cmd, arm, obj = parse_action(a, self.OBJECT_DICT)
             arm_str = "LEFT" if arm == 0 else 'RIGHT'
 
             prev_same_arm = same_arm == prev_same_arm
             same_arm = True if prev_arm == None else prev_arm == arm
+
+            self.curr_action = action
+            self._answer_queries()
 
             rospy.loginfo("same arm {}, last same arm {}".format(same_arm,prev_same_arm))
 
@@ -125,7 +128,7 @@ class HTMController(BaseController, RESTUtils):
             prev_arm = arm
 
 
-    def _get_permuted_htm(self):
+    def _get_queried_htm(self):
         cmd1 = '[["u", "We will build the back first."]]'
         cmd2 = '[["u", "We will build the screwdriver first."]]'
 
@@ -142,12 +145,12 @@ class HTMController(BaseController, RESTUtils):
 
     def _run(self):
         rospy.loginfo('Starting autonomous control')
-        rospy.sleep(3) # Add a little delay for self-filming!
+        # rospy.sleep(3) # Add a little delay for self-filming!
         if not self.do_query:
             self._take_actions(self.robot_actions)
         else:
             rospy.loginfo("Running permuted htm")
-            htm = self._get_permuted_htm()
+            htm = self._get_queried_htm()
             robot_actions = self._get_actions(htm.root)
             self._take_actions(robot_actions)
 
@@ -168,7 +171,7 @@ class HTMController(BaseController, RESTUtils):
                     yield c
         except ValueError:
             if root.action.agent == 'robot':
-                yield name
+                yield root
 
     def _train_learner_from_file(self):
         with open(self.CHAIR_PATH, 'r') as i:
@@ -177,6 +180,39 @@ class HTMController(BaseController, RESTUtils):
     def _learner_to_htm(self):
         j = json.loads(get().text)
         return HierarchicalTask(build_htm_recursively(j['nodes']))
+
+    def _answer_queries(self):
+        rospy.loginfo("curr act id: {}, curr root name: {}".format(self.curr_action.idx, self.htm.root.name))
+        parent = self._find_parent_node( self.htm.root, self.curr_action.idx)
+        if parent is not None:
+            rospy.loginfo('Found parent of {},{} : {},{}'.format(self.curr_action.name,self.curr_action.idx,parent.name, parent.idx))
+
+    def _query_type(self):
+        """Parses utterance to determine type of query"""
+        WHAT = "what?"
+        WHY = "why?"
+        NEXT = "next?"
+        DESCRIBE = "describe?"
+
+    def _find_parent_node(self, node, idx):
+        # rospy.loginfo("idx: {} curr act id: {}, curr name: {}".format(idx, node.idx, node.name))
+
+        if node.kind is None:
+            # rospy.loginfo('Node does not have any children')
+            return None
+
+        for c in node.children:
+            if idx == c.idx:
+                parent = node
+                # rospy.loginfo('Returning with parent: {} {}'.format(parent.name, parent.idx))
+                return parent
+            else:
+                # rospy.loginfo("not found. idx: {} child id: {}, child name: {}".format(idx, c.idx, c.name))
+                parent = self._find_parent_node(c, idx)
+
+                if parent is not None:
+                    # rospy.loginfo('Returning with parent: {} {}'.format(parent.name, parent.idx))
+                    return parent
 
 
 try:
