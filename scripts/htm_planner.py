@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 
 
-import argparse
 import os
 import threading
 import time
@@ -16,14 +15,6 @@ from human_robot_collaboration.service_request import finished_request
 from rpi_integration.learner_utils import RESTUtils, parse_action
 from std_msgs.msg import String
 
-parser = argparse.ArgumentParser("Run the autonomous HTM controller")
-parser.add_argument(
-    '--path', help='path to the model files',
-    default=os.path.join(os.path.abspath(os.path.dirname(__file__)),
-                         "../tests/out/full_chair.json"))
-parser.add_argument(
-    '--do_query', help="If you want to query a subtask in a learned tree.",
-    type=bool, default=False)
 
 
 
@@ -58,10 +49,20 @@ class HTMController(BaseController, RESTUtils):
 
     }
 
-    def __init__(self, json_path, do_query):
-        self.json_path = json_path
-        self.htm = json_to_htm(json_path)
-        self.last_r = finished_request
+    def __init__(self):
+        self.param_prefix       = "/rpi_integration"
+        self.json_path          = rospy.get_param(self.param_prefix + '/chair_file')
+
+        self.top_down_queries   = rospy.get_param(self.param_prefix + '/top_down')
+        self.bottom_up_queries  = rospy.get_param(self.param_prefix + '/bottom_up')
+        self.horizontal_queries = rospy.get_param(self.param_prefix + '/horizontal')
+
+        self.htm                = json_to_htm(self.json_path)
+        self.last_r             = finished_request
+
+        self.do_query           = rospy.get_param(self.param_prefix + "/do_query", False)
+        self._learner_pub       = rospy.Publisher('web_interface/json',
+                                                  String, queue_size =10)
 
         BaseController.__init__(
             self,
@@ -73,8 +74,6 @@ class HTMController(BaseController, RESTUtils):
         )
         RESTUtils.__init__(self)
 
-        self.do_query = do_query
-        self._learner_pub = rospy.Publisher('web_interface/json', String, queue_size=10)
 
         # self.delete()
         # self._train_learner_from_file()
@@ -182,10 +181,15 @@ class HTMController(BaseController, RESTUtils):
         return HierarchicalTask(build_htm_recursively(j['nodes']))
 
     def _answer_queries(self):
-        rospy.loginfo("curr act id: {}, curr root name: {}".format(self.curr_action.idx, self.htm.root.name))
-        parent = self._find_parent_node( self.htm.root, self.curr_action.idx)
-        if parent is not None:
-            rospy.loginfo('Found parent of {},{} : {},{}'.format(self.curr_action.name,self.curr_action.idx,parent.name, parent.idx))
+        # rospy.loginfo("curr act id: {}, curr root name: {}".format(self.curr_action.idx,
+        #                                                            self.htm.root.name))
+        #parent = self.htm.find_parent_node( self.htm.root, self.curr_action.idx)
+        next_human_act = self.htm.find_next_human_action( self.htm.root, self.curr_action.idx)
+        if next_human_act is not None:
+            rospy.loginfo(
+                'Found next human action {},{} : {},{}'.format(
+                    self.curr_action.name,self.curr_action.idx,
+                    next_human_act.name, next_human_act.idx))
 
     def _query_type(self):
         """Parses utterance to determine type of query"""
@@ -194,32 +198,10 @@ class HTMController(BaseController, RESTUtils):
         NEXT = "next?"
         DESCRIBE = "describe?"
 
-    def _find_parent_node(self, node, idx):
-        # rospy.loginfo("idx: {} curr act id: {}, curr name: {}".format(idx, node.idx, node.name))
-
-        if node.kind is None:
-            # rospy.loginfo('Node does not have any children')
-            return None
-
-        for c in node.children:
-            if idx == c.idx:
-                parent = node
-                # rospy.loginfo('Returning with parent: {} {}'.format(parent.name, parent.idx))
-                return parent
-            else:
-                # rospy.loginfo("not found. idx: {} child id: {}, child name: {}".format(idx, c.idx, c.name))
-                parent = self._find_parent_node(c, idx)
-
-                if parent is not None:
-                    # rospy.loginfo('Returning with parent: {} {}'.format(parent.name, parent.idx))
-                    return parent
 
 
 try:
-    args = parser.parse_args()
-    print(args.path)
-    controller = HTMController(args.path, args.do_query)
-
+    controller = HTMController()
     controller.run()
 except rospy.ROSInterruptException, KeyboardInterrupt:
     pass
