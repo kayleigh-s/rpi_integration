@@ -12,6 +12,7 @@ from task_models.task import HierarchicalTask
 import rospy
 from human_robot_collaboration.controller import BaseController
 from human_robot_collaboration.service_request import finished_request
+from ros_speech2text.msg import transcript
 from rpi_integration.learner_utils import RESTUtils, parse_action
 from std_msgs.msg import String
 
@@ -31,15 +32,23 @@ class HTMController(BaseController, RESTUtils):
     OBJECT_DICT = {
         "GET(seat)":               (BRING, BaseController.LEFT, 198),
         "GET(back)":               (BRING, BaseController.LEFT, 201),
-        "GET(dowel)":              [(BRING, BaseController.LEFT, 150), (BRING, BaseController.LEFT, 151),
-                                    (BRING, BaseController.LEFT, 152), (BRING, BaseController.LEFT, 153),
-                                    (BRING, BaseController.LEFT, 154), (BRING, BaseController.LEFT, 155)],
+        "GET(dowel)":              [(BRING, BaseController.LEFT, 150),
+                                    (BRING, BaseController.LEFT, 151),
+                                    (BRING, BaseController.LEFT, 152),
+                                    (BRING, BaseController.LEFT, 153),
+                                    (BRING, BaseController.LEFT, 154),
+                                    (BRING, BaseController.LEFT, 155)],
         "GET(dowel-top)":          (BRING, BaseController.LEFT, 156),
-        "GET(FOOT_BRACKET)":       [(BRING, BaseController.RIGHT, 10),(BRING, BaseController.RIGHT, 11),
-                                    (BRING, BaseController.RIGHT, 12), (BRING, BaseController.RIGHT, 13)],
-        "GET(bracket-front)":      [(BRING, BaseController.RIGHT, 14),(BRING, BaseController.RIGHT, 15),
-                                    (BRING, BaseController.RIGHT, 22), (BRING, BaseController.RIGHT, 23)],
-        "GET(bracket-top)":        [(BRING, BaseController.RIGHT, 16), (BRING, BaseController.RIGHT, 17)],
+        "GET(FOOT_BRACKET)":       [(BRING, BaseController.RIGHT, 10),
+                                    (BRING, BaseController.RIGHT, 11),
+                                    (BRING, BaseController.RIGHT, 12),
+                                    (BRING, BaseController.RIGHT, 13)],
+        "GET(bracket-front)":      [(BRING, BaseController.RIGHT, 14),
+                                    (BRING, BaseController.RIGHT, 15),
+                                    (BRING, BaseController.RIGHT, 22),
+                                    (BRING, BaseController.RIGHT, 23)],
+        "GET(bracket-top)":        [(BRING, BaseController.RIGHT, 16),
+                                    (BRING, BaseController.RIGHT, 17)],
         "GET(bracket-back-right)": (BRING, BaseController.RIGHT, 18),
         "GET(bracket-back-left)":  (BRING, BaseController.RIGHT, 19),
         "GET(screwdriver)":        (BRING, BaseController.RIGHT, 20),
@@ -50,12 +59,14 @@ class HTMController(BaseController, RESTUtils):
     }
 
     def __init__(self):
-        self.param_prefix       = "/rpi_integration"
-        self.json_path          = rospy.get_param(self.param_prefix + '/json_file')
+        self.param_prefix          = "/rpi_integration"
+        self.json_path             = rospy.get_param(self.param_prefix + '/json_file')
 
-        self.top_down_queries   = rospy.get_param(self.param_prefix + '/top_down')
-        self.bottom_up_queries  = rospy.get_param(self.param_prefix + '/bottom_up')
-        self.horizontal_queries = rospy.get_param(self.param_prefix + '/horizontal')
+        self.top_down_queries      = rospy.get_param(self.param_prefix + '/top_down')
+        self.bottom_up_queries     = rospy.get_param(self.param_prefix + '/bottom_up')
+        self.horizontal_queries    = rospy.get_param(self.param_prefix + '/horizontal')
+        self.stationary_queries    = rospy.get_param(self.param_prefix + '/stationary')
+        self.parameterized_queries = rospy.get_param(self.param_prefix + '/parameterized')
 
         self.htm                = json_to_htm(self.json_path)
         self.last_r             = finished_request
@@ -63,13 +74,18 @@ class HTMController(BaseController, RESTUtils):
         self.do_query           = rospy.get_param(self.param_prefix + "/do_query", False)
         self._learner_pub       = rospy.Publisher('web_interface/json',
                                                   String, queue_size =10)
+        self._listen_sub        = rospy.Subscriber(self.LISTEN_TOPIC,
+                                                   transcript, self._listen_query_cb)
+
+        self.why_query_timer    = None
+        self.WHY_ELAPSED_TIME   = 5.0
 
         BaseController.__init__(
             self,
             left=True,
             right=True,
-            speech=False,
-            listen=True,
+            speech=True,
+            listen=False,
             recovery=True,
         )
         RESTUtils.__init__(self)
@@ -84,25 +100,29 @@ class HTMController(BaseController, RESTUtils):
         return self._get_actions(self.htm.root)
 
     def _take_actions(self, actions):
-        prev_arm = None # was left or right arm used previously?
-        same_arm = True # Was previous action taken using the same arm as curr action?
-        prev_same_arm = True # Was the previous previous action taken using same arm?
+        prev_arm      = None # was left or right arm used previously?
+        same_arm      = True # Was previous action taken
+                             # using the same arm as curr action?
+        prev_same_arm = True # Was the previous previous
+                             # action taken using same arm?
 
         # Publishing the htm before anything
         self._learner_pub.publish(open(self.json_path, 'r').read())
 
         for action in actions:
-            a = action.name # From the name we can get correct ROS service
+
+            a             = action.name # From the name we can get correct ROS service
             cmd, arm, obj = parse_action(a, self.OBJECT_DICT)
-            arm_str = "LEFT" if arm == 0 else 'RIGHT'
+            arm_str       = "LEFT" if arm == 0 else 'RIGHT'
 
             prev_same_arm = same_arm == prev_same_arm
-            same_arm = True if prev_arm == None else prev_arm == arm
+            same_arm      = True if prev_arm == None else prev_arm == arm
 
             self.curr_action = action
             self._answer_queries()
 
-            rospy.loginfo("same arm {}, last same arm {}".format(same_arm,prev_same_arm))
+            rospy.loginfo("same arm {}, last same arm {}".format(same_arm,
+                                                                 prev_same_arm))
 
             # Only sleep when encountering diff arms for first time.
             # prevents both arms from acting simultaneously.
@@ -191,13 +211,74 @@ class HTMController(BaseController, RESTUtils):
                     self.curr_action.name,self.curr_action.idx,
                     next_human_act.name, next_human_act.idx))
 
-    def _query_type(self):
-        """Parses utterance to determine type of query"""
-        WHAT = "what?"
-        WHY = "why?"
-        NEXT = "next?"
-        DESCRIBE = "describe?"
+    def _listen_query_cb(self, msg):
+        rospy.loginfo("QUERY RECEIVED: {}".format(msg.transcript))
+        responses = self._select_query(msg.transcript.lower().strip())
 
+        for r in responses:
+            rospy.loginfo(r)
+
+    def _select_query(self, transcript):
+        """Parses utterance to determine type of query"""
+        responses = []
+
+        for q in self.parameterized_queries:
+            if q in transcript:
+                subtask = transcript.split()[-1]
+
+                if "why are we building a" in transcript:
+                    node   = self.htm.find_node_by_name(self.htm.root, subtask)
+                    parent = self.htm.find_parent_node(self.htm.root, node.idx)
+                    r      = "We are building a {} in order to {}".format(subtask, parent.name)
+                    return r
+
+        if transcript in self.top_down_queries:
+            task           = self.htm.root.children[0]
+            children_names = [c.name for c in task.children]
+            r              = "Our task is to {}".format(task.name)
+
+            responses.append(r)
+
+            if len(children_names) > 1:
+                r = "First, we will {}".format(children_names.pop())
+                responses.append(r)
+
+                while(len(children_names) > 1):
+                    r = "Then, we will {}".format(children_names.pop())
+                    responses.append(r)
+
+                r = "Finally, we will {}".format(children_names.pop())
+                responses.append(r)
+
+            else:
+                r = "All we need to do is {}".format(children_names.pop())
+                responses.append(r)
+
+
+        elif transcript in self.bottom_up_queries:
+
+            if "{}" in transcript:
+                subtask = transcript.split()[-1]
+
+            # if self.why_query_timer:
+            #     elapsed = time.time() - self.why_query_timer
+            #     if elapsed < self.WHY_ELAPSED_TIME:
+            #         self.curr_parent_id = self.
+            # r = "We are {} in order to {}".format(
+            #     self.curr_action.name,
+            #     self.htm.find_parent_node(self.htm.root,
+            #                               self.curr_action.idx)
+            # )
+
+        elif transcript in self.stationary_queries:
+            r ="I am {}".format(self.curr_action.name)
+            responses.append(R)
+
+
+        else:
+            return ["Sorry, I didn't understand: \"{}\"".format(transcript)]
+
+        return responses
 
 
 try:

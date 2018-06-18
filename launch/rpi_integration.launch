@@ -3,7 +3,7 @@
     <!-- If to use the robot or not (useful for debugging) -->
     <arg name="use_robot" default="true"/>
     <!-- If to use the aruco stuff or not -->
-    <arg name="use_aruco" default="true"/>
+    <arg name="use_aruco" default="false"/>
     <!-- If to use the speech to text or not -->
     <arg name="use_tts" default="true"/>
     <!-- If to use the text to speech or not -->
@@ -22,22 +22,34 @@
 
     <rosparam param = "rpi_integration/top_down">
         [
-        "What are we doing",
-        "How can I build a chair",
-        "what are you doing"
+        "what is the task"
         ]
     </rosparam>
 
     <rosparam param = "rpi_integration/bottom_up">
         [
-        "Why are we doing this",
+        "what are we doing",
+        "why are we doing this",
         "why"
         ]
     </rosparam>
 
     <rosparam param = "rpi_integration/horizontal">
         [
-        "What should I do next"
+        "what should I do next"
+        ]
+    </rosparam>
+
+    <rosparam param = "rpi_integration/stationary">
+        [
+        "what are you doing"
+        ]
+    </rosparam>
+
+    <rosparam param = "rpi_integration/parameterized">
+        [
+        "why are we building a",
+        "how can I build a"
         ]
     </rosparam>
 
@@ -56,3 +68,4 @@
 
 
 </launch>
+
