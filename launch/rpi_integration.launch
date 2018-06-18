@@ -40,7 +40,7 @@
         "What should I do next"
         ]
     </rosparam>
-1
+
     <!-- NODES -->
     <include file="$(find human_robot_collaboration)/launch/chair_task.launch" >
         <arg name="use_robot"          value="$(arg use_robot)"/>
