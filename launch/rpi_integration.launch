@@ -1,0 +1,37 @@
+<launch>
+
+  
+
+  <rosparam param = "rpi_integration/top_down">
+    [
+    "What are we doing",
+    "How can I build a chair",
+    "what are you doing"
+    ]
+  </rosparam>
+
+  <rosparam param = "rpi_integration/bottom_up">
+    [
+    "Why are we doing this",
+    "why"
+    ]
+  </rosparam>
+
+  <rosparam param = "rpi_integration/horizontal">
+    [
+    "What should I do next"
+    ]
+  </rosparam>
+
+  <param name="rpi_integration/chair_file" value="$(find rpi_integration)/tests/out/full_chair.json"/>
+
+  <arg name="use_robot" default="true" />
+
+  <include file="$(find hrc_speech_prediction)/launch/speech_prediction.launch" >
+    <arg name="use_robot" value="$(arg use_robot)"/>
+  </include>
+
+  <node pkg="rpi_integration" type="htm_planner.py" name="htm_planner" output="screen"/>
+
+
+</launch>
