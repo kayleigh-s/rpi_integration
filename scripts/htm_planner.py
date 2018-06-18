@@ -29,29 +29,29 @@ class HTMController(BaseController, RESTUtils):
     HOLD_LEG ='hold_leg'
 
     OBJECT_DICT = {
-        "GET(seat)": (BRING, BaseController.LEFT, 198),
-        "GET(back)": (BRING, BaseController.LEFT, 201),
-        "GET(dowel)": [(BRING, BaseController.LEFT, 150), (BRING, BaseController.LEFT, 151),
-                       (BRING, BaseController.LEFT, 152), (BRING, BaseController.LEFT, 153),
-                       (BRING, BaseController.LEFT, 154), (BRING, BaseController.LEFT, 155)],
-        "GET(dowel-top)": (BRING, BaseController.LEFT, 156),
-        "GET(FOOT_BRACKET)": [(BRING, BaseController.RIGHT, 10),(BRING, BaseController.RIGHT, 11),
-                              (BRING, BaseController.RIGHT, 12), (BRING, BaseController.RIGHT, 13)],
-        "GET(bracket-front)": [(BRING, BaseController.RIGHT, 14),(BRING, BaseController.RIGHT, 15),
-                               (BRING, BaseController.RIGHT, 22), (BRING, BaseController.RIGHT, 23)],
-        "GET(bracket-top)": [(BRING, BaseController.RIGHT, 16), (BRING, BaseController.RIGHT, 17)],
+        "GET(seat)":               (BRING, BaseController.LEFT, 198),
+        "GET(back)":               (BRING, BaseController.LEFT, 201),
+        "GET(dowel)":              [(BRING, BaseController.LEFT, 150), (BRING, BaseController.LEFT, 151),
+                                    (BRING, BaseController.LEFT, 152), (BRING, BaseController.LEFT, 153),
+                                    (BRING, BaseController.LEFT, 154), (BRING, BaseController.LEFT, 155)],
+        "GET(dowel-top)":          (BRING, BaseController.LEFT, 156),
+        "GET(FOOT_BRACKET)":       [(BRING, BaseController.RIGHT, 10),(BRING, BaseController.RIGHT, 11),
+                                    (BRING, BaseController.RIGHT, 12), (BRING, BaseController.RIGHT, 13)],
+        "GET(bracket-front)":      [(BRING, BaseController.RIGHT, 14),(BRING, BaseController.RIGHT, 15),
+                                    (BRING, BaseController.RIGHT, 22), (BRING, BaseController.RIGHT, 23)],
+        "GET(bracket-top)":        [(BRING, BaseController.RIGHT, 16), (BRING, BaseController.RIGHT, 17)],
         "GET(bracket-back-right)": (BRING, BaseController.RIGHT, 18),
-        "GET(bracket-back-left)": (BRING, BaseController.RIGHT, 19),
-        "GET(screwdriver)": (BRING, BaseController.RIGHT, 20),
-        "HOLD(dowel)": (HOLD_LEG, BaseController.RIGHT, 0),
-        "HOLD(seat)": (HOLD_LEG, BaseController.RIGHT, 0),
-        "HOLD(back)": (HOLD_LEG, BaseController.RIGHT, 0)
+        "GET(bracket-back-left)":  (BRING, BaseController.RIGHT, 19),
+        "GET(screwdriver)":        (BRING, BaseController.RIGHT, 20),
+        "HOLD(dowel)":             (HOLD_LEG, BaseController.RIGHT, 0),
+        "HOLD(seat)":              (HOLD_LEG, BaseController.RIGHT, 0),
+        "HOLD(back)":              (HOLD_LEG, BaseController.RIGHT, 0)
 
     }
 
     def __init__(self):
         self.param_prefix       = "/rpi_integration"
-        self.json_path          = rospy.get_param(self.param_prefix + '/chair_file')
+        self.json_path          = rospy.get_param(self.param_prefix + '/json_file')
 
         self.top_down_queries   = rospy.get_param(self.param_prefix + '/top_down')
         self.bottom_up_queries  = rospy.get_param(self.param_prefix + '/bottom_up')

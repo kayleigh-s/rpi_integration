@@ -1,37 +1,58 @@
 <launch>
+    <!-- INPUT ARGUMENTS -->
+    <!-- If to use the robot or not (useful for debugging) -->
+    <arg name="use_robot" default="true"/>
+    <!-- If to use the aruco stuff or not -->
+    <arg name="use_aruco" default="true"/>
+    <!-- If to use the speech to text or not -->
+    <arg name="use_tts" default="true"/>
+    <!-- If to use the text to speech or not -->
+    <arg name="use_stt" default="true"/>
+    <!-- If to use rosbridge server or not -->
+    <arg name="use_rosbridge" default="true"/>
+    <!-- If to use baxter_display or not -->
+    <arg name="use_baxter_display" default="true"/>
+    <!-- print level (shared throughout the control code) -->
+    <arg name="print_level" default="0"/>
+    <!-- Name of the file that contains the task in json format -->
+    <arg name="json_file" default="$(find rpi_integration)/tests/out/full_chair.json" />
 
-  
+    <!-- ROS PARAMETERS -->
+    <param name="rpi_integration/json_file" value="$(arg json_file)"/>
 
-  <rosparam param = "rpi_integration/top_down">
-    [
-    "What are we doing",
-    "How can I build a chair",
-    "what are you doing"
-    ]
-  </rosparam>
+    <rosparam param = "rpi_integration/top_down">
+        [
+        "What are we doing",
+        "How can I build a chair",
+        "what are you doing"
+        ]
+    </rosparam>
 
-  <rosparam param = "rpi_integration/bottom_up">
-    [
-    "Why are we doing this",
-    "why"
-    ]
-  </rosparam>
+    <rosparam param = "rpi_integration/bottom_up">
+        [
+        "Why are we doing this",
+        "why"
+        ]
+    </rosparam>
 
-  <rosparam param = "rpi_integration/horizontal">
-    [
-    "What should I do next"
-    ]
-  </rosparam>
+    <rosparam param = "rpi_integration/horizontal">
+        [
+        "What should I do next"
+        ]
+    </rosparam>
+1
+    <!-- NODES -->
+    <include file="$(find human_robot_collaboration)/launch/chair_task.launch" >
+        <arg name="use_robot"          value="$(arg use_robot)"/>
+        <arg name="use_aruco"          value="$(arg use_aruco)"/>
+        <arg name="use_tts"            value="$(arg use_tts)"/>
+        <arg name="use_stt"            value="$(arg use_stt)"/>
+        <arg name="use_rosbridge"      value="$(arg use_rosbridge)"/>
+        <arg name="use_baxter_display" value="$(arg use_baxter_display)"/>
+        <arg name="print_level"        value="$(arg print_level)"/>
+    </include>
 
-  <param name="rpi_integration/chair_file" value="$(find rpi_integration)/tests/out/full_chair.json"/>
-
-  <arg name="use_robot" default="true" />
-
-  <include file="$(find hrc_speech_prediction)/launch/speech_prediction.launch" >
-    <arg name="use_robot" value="$(arg use_robot)"/>
-  </include>
-
-  <node pkg="rpi_integration" type="htm_planner.py" name="htm_planner" output="screen"/>
+    <node pkg="rpi_integration" type="htm_planner.py" name="htm_planner" output="screen"/>
 
 
 </launch>
