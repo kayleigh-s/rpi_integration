@@ -1,11 +1,13 @@
 #!/usr/bin/env python
 
-
 import os
 import threading
 import time
+import re
 from random import shuffle
+from threading import Lock
 
+from svox_tts.srv import Speech, SpeechRequest
 from task_models.json_to_htm import json_to_htm
 from task_models.task import HierarchicalTask
 
@@ -15,9 +17,6 @@ from human_robot_collaboration.service_request import finished_request
 from ros_speech2text.msg import transcript
 from rpi_integration.learner_utils import RESTUtils, parse_action
 from std_msgs.msg import String
-
-
-
 
 
 class HTMController(BaseController, RESTUtils):
@@ -59,14 +58,16 @@ class HTMController(BaseController, RESTUtils):
     }
 
     def __init__(self):
-        self.param_prefix          = "/rpi_integration"
-        self.json_path             = rospy.get_param(self.param_prefix + '/json_file')
+        self.param_prefix       = "/rpi_integration"
+        self.json_path          = rospy.get_param(self.param_prefix + '/json_file')
 
-        self.top_down_queries      = rospy.get_param(self.param_prefix + '/top_down')
-        self.bottom_up_queries     = rospy.get_param(self.param_prefix + '/bottom_up')
-        self.horizontal_queries    = rospy.get_param(self.param_prefix + '/horizontal')
-        self.stationary_queries    = rospy.get_param(self.param_prefix + '/stationary')
-        self.parameterized_queries = rospy.get_param(self.param_prefix + '/parameterized')
+        self.autostart          = rospy.get_param(self.param_prefix + '/autostart')
+        self.use_stt            = rospy.get_param(self.param_prefix + '/use_stt')
+
+        self.top_down_queries   = rospy.get_param(self.param_prefix + '/top_down')
+        self.bottom_up_queries  = rospy.get_param(self.param_prefix + '/bottom_up')
+        self.horizontal_queries = rospy.get_param(self.param_prefix + '/horizontal')
+        self.stationary_queries = rospy.get_param(self.param_prefix + '/stationary')
 
         self.htm                = json_to_htm(self.json_path)
         self.last_r             = finished_request
@@ -79,6 +80,10 @@ class HTMController(BaseController, RESTUtils):
 
         self.why_query_timer    = None
         self.WHY_ELAPSED_TIME   = 5.0
+
+        self.lock               = Lock()
+        self.START_CMD          = False
+        self.LISTENING          = False
 
         BaseController.__init__(
             self,
@@ -111,15 +116,22 @@ class HTMController(BaseController, RESTUtils):
 
         for action in actions:
 
-            a             = action.name # From the name we can get correct ROS service
-            cmd, arm, obj = parse_action(a, self.OBJECT_DICT)
+            spoken_flag = False
+            while(self.LISTENING):
+                if not spoken_flag:
+                    rospy.loginfo("Waiting until query is done....")
+                    spoken_flag = True
+                rospy.sleep(0.1)
+
+
+            # From the name we can get correct ROS service
+            cmd, arm, obj = parse_action(action.name, self.OBJECT_DICT)
             arm_str       = "LEFT" if arm == 0 else 'RIGHT'
 
             prev_same_arm = same_arm == prev_same_arm
             same_arm      = True if prev_arm == None else prev_arm == arm
 
             self.curr_action = action
-            self._answer_queries()
 
             rospy.loginfo("same arm {}, last same arm {}".format(same_arm,
                                                                  prev_same_arm))
@@ -165,13 +177,17 @@ class HTMController(BaseController, RESTUtils):
     def _run(self):
         rospy.loginfo('Starting autonomous control')
         # rospy.sleep(3) # Add a little delay for self-filming!
-        if not self.do_query:
+        if self.autostart:
             self._take_actions(self.robot_actions)
         else:
-            rospy.loginfo("Running permuted htm")
-            htm = self._get_queried_htm()
-            robot_actions = self._get_actions(htm.root)
-            self._take_actions(robot_actions)
+            spoken_flag = False
+            while(not self.START_CMD):
+                if not spoken_flag:
+                    rospy.loginfo("Waiting to start....")
+                    spoken_flag = True
+                rospy.sleep(0.1)
+
+            self._take_actions(self.robot_actions)
 
     def _get_actions(self, root):
         """ Recursively retrieves actions in correct order """
@@ -200,42 +216,50 @@ class HTMController(BaseController, RESTUtils):
         j = json.loads(get().text)
         return HierarchicalTask(build_htm_recursively(j['nodes']))
 
-    def _answer_queries(self):
-        # rospy.loginfo("curr act id: {}, curr root name: {}".format(self.curr_action.idx,
-        #                                                            self.htm.root.name))
-        #parent = self.htm.find_parent_node( self.htm.root, self.curr_action.idx)
-        next_human_act = self.htm.find_next_human_action( self.htm.root, self.curr_action.idx)
-        if next_human_act is not None:
-            rospy.loginfo(
-                'Found next human action {},{} : {},{}'.format(
-                    self.curr_action.name,self.curr_action.idx,
-                    next_human_act.name, next_human_act.idx))
 
     def _listen_query_cb(self, msg):
         rospy.loginfo("QUERY RECEIVED: {}".format(msg.transcript))
-        responses = self._select_query(msg.transcript.lower().strip())
+        with self.lock:
+            self.LISTENING = True
 
-        for r in responses:
-            rospy.loginfo(r)
+        if not self.START_CMD:
+            self._baxter_begin(msg.transcript.lower().strip())
+            self.LISTENING = False
+            return
+
+        responses = self._select_query(msg.transcript.lower().strip())
+        for response in responses:
+            if self.use_stt:
+                utterance        = SpeechRequest()
+                utterance.mode   = utterance.SAY
+                utterance.string = response
+
+                self.speech(utterance)
+            else:
+                rospy.loginfo(utterance)
+
+        with self.lock:
+            self.LISTENING = False
 
     def _select_query(self, transcript):
         """Parses utterance to determine type of query"""
-        responses = []
+        responses        = []
+        split_transcript = transcript.split()
 
-        for q in self.parameterized_queries:
-            if q in transcript:
-                subtask = transcript.split()[-1]
+        if len(split_transcript) > 1:
+            transcript = ' '.join(split_transcript[:-1])
+            param      = split_transcript[-1]
 
-                if "why are we building a" in transcript:
-                    node   = self.htm.find_node_by_name(self.htm.root, subtask)
-                    parent = self.htm.find_parent_node(self.htm.root, node.idx)
-                    r      = "We are building a {} in order to {}".format(subtask, parent.name)
-                    return r
 
-        if transcript in self.top_down_queries:
-            task           = self.htm.root.children[0]
-            children_names = [c.name for c in task.children]
-            response       = "Our task is to {}".format(task.name)
+        if transcript in '\t'.join(self.top_down_queries):
+            if "how can we build a" in transcript:
+                task           = self.htm.find_node_by_name(self.htm.root, param)
+                children_names = [c.name for c in task.children]
+                response       = "In order to  {}".format(task.name)
+            else:
+                task           = self.htm.root.children[0]
+                children_names = [c.name for c in task.children]
+                response       = "Our task is to {}".format(task.name)
 
             responses.append(response)
 
@@ -255,34 +279,54 @@ class HTMController(BaseController, RESTUtils):
                 responses.append(response)
 
 
-        elif transcript in self.bottom_up_queries:
+        elif transcript in '\t'.join(self.horizontal_queries):
+            next_human_action = self.htm.find_next_human_action(self.htm.root,
+                                                                self.curr_action.idx)
+            response          = "You should {}".format(next_human_action.name)
+            responses.append(response)
 
-            if "{}" in transcript:
-                subtask = transcript.split()[-1]
+        elif transcript in '\t'.join(self.bottom_up_queries):
 
-            # if self.why_query_timer:
-            #     elapsed = time.time() - self.why_query_timer
-            #     if elapsed < self.WHY_ELAPSED_TIME:
-            #         self.curr_parent_id = self.
-            # r = "We are {} in order to {}".format(
-            #     self.curr_action.name,
-            #     self.htm.find_parent_node(self.htm.root,
-            #                               self.curr_action.idx)
-            # )
+            rospy.loginfo("IN BOTTOM UP")
+            if "why are we building a" in transcript:
+                node             = self.htm.find_node_by_name(self.htm.root, param)
+                self.curr_parent = self.htm.find_parent_node(self.htm.root, node.idx)
+                response         = "We are building a {} in order to {}".format(param,
+                                                                                self.curr_parent.name)
+            elif transcript in "why":
+                if not self.curr_parent:
+                    rospy.logwarn("Sorry, I didn't understand: \"{}\"".format(transcript))
+                else:
+                    self.curr_parent = self.htm.find_parent_node(self.htm.root,
+                                                                 self.curr_parent.idx)
+                    response = "So that we can {}".format(self.curr_parent.name)
+            else:
+                self.curr_parent = self.htm.find_parent_node(self.htm.root,
+                                                                 self.curr_action.idx)
+                response = "So that we can {}".format(self.curr_parent.name)
+
+            responses.append(response)
+
 
         elif transcript in self.stationary_queries:
-            r ="I am {}".format(self.curr_action.name)
-            responses.append(R)
+            response ="I am {}".format(self.curr_action.name)
+            responses.append(response)
 
 
         else:
-            return ["Sorry, I didn't understand: \"{}\"".format(transcript)]
+            rospy.logwarn("Sorry, I didn't understand: \"{}\"".format(transcript))
 
         return responses
 
+    def _baxter_begin(self,utter):
+        """
+        Checks if the start command has been issued
+        """
+        if utter:
+            regex = r"^(\w+\b\s){0,2}(let's begin|let's start|begin|let us start|begin|let's go)"
+            self.START_CMD = re.search(regex, utter.lower())
+        else:
+            self.START_CMD = False  # than utter is probably None
 
-try:
-    controller = HTMController()
-    controller.run()
-except rospy.ROSInterruptException, KeyboardInterrupt:
-    pass
+        return
+
