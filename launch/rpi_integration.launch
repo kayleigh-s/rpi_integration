@@ -16,19 +16,26 @@
     <arg name="print_level" default="0"/>
     <!-- Name of the file that contains the task in json format -->
     <arg name="json_file" default="$(find rpi_integration)/tests/out/full_chair.json" />
+    <!-- If to autostart control or to wait for an utterance from the user -->
+    <arg name="autostart" default="false" />
 
     <!-- ROS PARAMETERS -->
     <param name="rpi_integration/json_file" value="$(arg json_file)"/>
+    <param name="rpi_integration/autostart" value="$(arg autostart)"/>
+    <param name="rpi_integration/use_stt" value="$(arg use_stt)"/>
+    <param name="rpi_integration/testing" value="false"/>
 
     <rosparam param = "rpi_integration/top_down">
         [
-        "what is the task"
+        "what is the task",
+        "how can we build a"
         ]
     </rosparam>
 
     <rosparam param = "rpi_integration/bottom_up">
         [
         "what are we doing",
+        "why are we building a",
         "why are we doing this",
         "why"
         ]
@@ -46,12 +53,6 @@
         ]
     </rosparam>
 
-    <rosparam param = "rpi_integration/parameterized">
-        [
-        "why are we building a",
-        "how can I build a"
-        ]
-    </rosparam>
 
     <!-- NODES -->
     <include file="$(find human_robot_collaboration)/launch/chair_task.launch" >
@@ -64,8 +65,7 @@
         <arg name="print_level"        value="$(arg print_level)"/>
     </include>
 
-    <node pkg="rpi_integration" type="htm_planner.py" name="htm_planner" output="screen"/>
-
+    <node pkg="rpi_integration" type="htm_controller.py" name="htm_controller" output="screen"/>
 
 </launch>
 
