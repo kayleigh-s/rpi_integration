@@ -19,9 +19,6 @@
     <!-- If to autostart control or to wait for an utterance from the user -->
     <arg name="autostart" default="false" />
 
-    <!-- ROS PARAMETERS -->
-    <param name="rpi_integration/testing" value="false"/>
-
     <!-- NODES -->
     <include file="$(find rpi_integration)/launch/rpi_integration.launch" >
         <arg name="use_robot"          value="$(arg use_robot)"/>
@@ -31,6 +28,7 @@
         <arg name="use_rosbridge"      value="$(arg use_rosbridge)"/>
         <arg name="use_baxter_display" value="$(arg use_baxter_display)"/>
         <arg name="print_level"        value="$(arg print_level)"/>
+        <arg name="testing"            value="false" />
     </include>
 
     <!-- TESTS -->
