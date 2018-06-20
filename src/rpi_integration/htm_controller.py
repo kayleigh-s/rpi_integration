@@ -18,6 +18,37 @@ from ros_speech2text.msg import transcript
 from rpi_integration.learner_utils import RESTUtils, parse_action
 from std_msgs.msg import String
 
+def transcript_in_query_list(transcript, query_list):
+    """
+    Checks if query is in one of the list and whether its parameterized
+    Will return a boolean, or string if parameterized.
+    """
+    param_indicator = "{}"
+
+    for q in query_list:
+        rospy.loginfo("{}".format(q))
+        if param_indicator in q:
+            q_list      = q.split()
+            trans_list  = transcript.split()
+
+            param_index = q_list.index(param_indicator)
+
+            try:
+                q_list.pop(param_index)
+                param = trans_list.pop(param_index)
+            except IndexError: # Then the two lists dont match
+               continue
+
+            if trans_list == q_list:
+                return param
+            else:
+                return False
+
+        elif transcript in q:
+            return True
+
+    return False
+
 
 class HTMController(BaseController, RESTUtils):
     """Controls Baxter using HTN derived from json"""
@@ -62,7 +93,8 @@ class HTMController(BaseController, RESTUtils):
         self.json_path          = rospy.get_param(self.param_prefix + '/json_file')
 
         self.autostart          = rospy.get_param(self.param_prefix + '/autostart')
-        self.use_stt            = rospy.get_param(self.param_prefix + '/use_stt')
+        self.use_stt            = rospy.get_param(self.param_prefix + '/use_stt', False)
+        self.use_tts            = rospy.get_param(self.param_prefix + '/use_tts', False)
 
         self.top_down_queries   = rospy.get_param(self.param_prefix + '/top_down')
         self.bottom_up_queries  = rospy.get_param(self.param_prefix + '/bottom_up')
@@ -75,26 +107,27 @@ class HTMController(BaseController, RESTUtils):
         self.do_query           = rospy.get_param(self.param_prefix + "/do_query", False)
         self._learner_pub       = rospy.Publisher('web_interface/json',
                                                   String, queue_size =10)
-        self._listen_sub        = rospy.Subscriber(self.LISTEN_TOPIC,
+        self._listen_sub        = rospy.Subscriber(self.STT_TOPIC,
                                                    transcript, self._listen_query_cb)
 
-        self.why_query_timer    = None
-        self.WHY_ELAPSED_TIME   = 5.0
-
         self.lock               = Lock()
-        self.START_CMD          = False
-        self.LISTENING          = False
 
         BaseController.__init__(
             self,
-            left=True,
-            right=True,
-            speech=True,
-            listen=False,
+            use_left=True,
+            use_right=True,
+            use_stt=self.use_stt,
+            use_tts=False,
             recovery=True,
         )
         RESTUtils.__init__(self)
+        
+        if self.testing:
+            self.START_CMD      = True
+        else:
+            self.START_CMD      = False
 
+        self.LISTENING          = False
 
         # self.delete()
         # self._train_learner_from_file()
@@ -242,21 +275,31 @@ class HTMController(BaseController, RESTUtils):
             self.LISTENING = False
 
     def _select_query(self, transcript):
-        """Parses utterance to determine type of query"""
+        """
+        Parses utterance to determine type of query
+        Returns a list of responses for robot to say.
+        """
         responses        = []
-        split_transcript = transcript.split()
 
-        if len(split_transcript) > 1:
-            transcript = ' '.join(split_transcript[:-1])
-            param      = split_transcript[-1]
+        # These check if the transcript are in one of the lists defined in param server.
+        # these params code be strings, which indicates a match with a parameterized query.
+        param_top_down   = transcript_in_query_list(transcript, self.top_down_queries)
+        param_bottom_up  = transcript_in_query_list(transcript, self.bottom_up_queries)
+        param_horizontal = transcript_in_query_list(transcript, self.horizontal_queries)
+        param_stationary = transcript_in_query_list(transcript, self.stationary_queries)
 
+        if param_top_down:
+            if isinstance(param_top_down, str): # if true, then is paramaterized query
+                # Finds node associated with parameter
+                task = self.htm.find_node_by_name(self.htm.root, param_top_down)
 
-        if transcript in '\t'.join(self.top_down_queries):
-            if "how can we build a" in transcript:
-                task           = self.htm.find_node_by_name(self.htm.root, param)
-                children_names = [c.name for c in task.children]
-                response       = "In order to  {}".format(task.name)
-            else:
+                if not task: # Couldn't find the node by name
+                    rospy.logerr("Couldnt find node by name {}".format(param_top_down))
+                    return None
+                else:
+                    children_names = [c.name for c in task.children]
+                    response       = "In order to  {}".format(task.name)
+            else: # Not parameterized so go down HTM from top.
                 task           = self.htm.root.children[0]
                 children_names = [c.name for c in task.children]
                 response       = "Our task is to {}".format(task.name)
@@ -279,21 +322,21 @@ class HTMController(BaseController, RESTUtils):
                 responses.append(response)
 
 
-        elif transcript in '\t'.join(self.horizontal_queries):
+        elif param_horizontal:
             next_human_action = self.htm.find_next_human_action(self.htm.root,
                                                                 self.curr_action.idx)
             response          = "You should {}".format(next_human_action.name)
             responses.append(response)
 
-        elif transcript in '\t'.join(self.bottom_up_queries):
+        elif param_bottom_up:
 
             rospy.loginfo("IN BOTTOM UP")
-            if "why are we building a" in transcript:
-                node             = self.htm.find_node_by_name(self.htm.root, param)
+            if isinstance(param_bottom_up, str):
+                node             = self.htm.find_node_by_name(self.htm.root, param_bottom_up)
                 self.curr_parent = self.htm.find_parent_node(self.htm.root, node.idx)
                 response         = "We are building a {} in order to {}".format(param,
                                                                                 self.curr_parent.name)
-            elif transcript in "why":
+            elif transcript in "why": #  Response to "why" is conditional on previous query
                 if not self.curr_parent:
                     rospy.logwarn("Sorry, I didn't understand: \"{}\"".format(transcript))
                 else:
@@ -308,7 +351,7 @@ class HTMController(BaseController, RESTUtils):
             responses.append(response)
 
 
-        elif transcript in self.stationary_queries:
+        elif param_stationary:
             response ="I am {}".format(self.curr_action.name)
             responses.append(response)
 
