@@ -30,14 +30,16 @@
     <rosparam param = "rpi_integration/top_down">
         [
         "what is the task",
-        "how can we build a {}"
+        "how can we build a {}",
+        "how is the {} built"
         ]
     </rosparam>
 
     <rosparam param = "rpi_integration/bottom_up">
         [
         "what are we doing",
-        "why are we building a {}",
+        "why do we need to {}",
+        "what is {} for",
         "why are we doing this",
         "why"
         ]
