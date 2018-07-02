@@ -26,7 +26,6 @@ def transcript_in_query_list(transcript, query_list):
     param_indicator = "{}"
 
     for q in query_list:
-        rospy.loginfo("{}".format(q))
         if param_indicator in q:
             q_list      = q.split()
             trans_list  = transcript.split()
@@ -41,8 +40,6 @@ def transcript_in_query_list(transcript, query_list):
 
             if trans_list == q_list:
                 return param
-            else:
-                return False
 
         elif transcript in q:
             return True
@@ -110,6 +107,7 @@ class HTMController(BaseController, RESTUtils):
         self._listen_sub        = rospy.Subscriber(self.STT_TOPIC,
                                                    transcript, self._listen_query_cb)
 
+        self.curr_parent        = None
         self.lock               = Lock()
 
         BaseController.__init__(
@@ -326,15 +324,20 @@ class HTMController(BaseController, RESTUtils):
             next_human_action = self.htm.find_next_human_action(self.htm.root,
                                                                 self.curr_action.idx)
             response          = "You should {}".format(next_human_action.name)
+            # set this so that you can ask follow up query (e.g. "why?"")
+            self.curr_parent  = self.htm.find_parent_node(self.htm.root,
+                                                         self.next_human_action.idx)
             responses.append(response)
 
         elif param_bottom_up:
 
             rospy.loginfo("IN BOTTOM UP")
+            rospy.loginfo(transcript)
+
             if isinstance(param_bottom_up, str):
                 node             = self.htm.find_node_by_name(self.htm.root, param_bottom_up)
                 self.curr_parent = self.htm.find_parent_node(self.htm.root, node.idx)
-                response         = "We are building a {} in order to {}".format(param,
+                response         = "We are building a {} in order to {}".format(param_bottom_up,
                                                                                 self.curr_parent.name)
             elif transcript in "why": #  Response to "why" is conditional on previous query
                 if not self.curr_parent:
@@ -345,14 +348,17 @@ class HTMController(BaseController, RESTUtils):
                     response = "So that we can {}".format(self.curr_parent.name)
             else:
                 self.curr_parent = self.htm.find_parent_node(self.htm.root,
-                                                                 self.curr_action.idx)
+                                                             self.curr_action.idx)
                 response = "So that we can {}".format(self.curr_parent.name)
 
             responses.append(response)
 
 
         elif param_stationary:
-            response ="I am {}".format(self.curr_action.name)
+            response = "Currently, I am {}".format(self.curr_action.name)
+            # set this so that you can ask follow up query (e.g. "why?"")
+            self.curr_parent = self.htm.find_parent_node(self.htm.root,
+                                                         self.curr_action.idx)
             responses.append(response)
 
 
