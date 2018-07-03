@@ -119,7 +119,7 @@ class HTMController(BaseController, RESTUtils):
             recovery=True,
         )
         RESTUtils.__init__(self)
-        
+
         if self.testing:
             self.START_CMD      = True
         else:
@@ -378,4 +378,3 @@ class HTMController(BaseController, RESTUtils):
             self.START_CMD = False  # than utter is probably None
 
         return
-
