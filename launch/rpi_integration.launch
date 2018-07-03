@@ -38,7 +38,7 @@
     <rosparam param = "rpi_integration/bottom_up">
         [
         "what are we doing",
-        "why do we need to {}",
+        "why do we need to build {}",
         "what is {} for",
         "why are we doing this",
         "why"

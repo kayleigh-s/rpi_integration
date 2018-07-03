@@ -50,6 +50,10 @@ Example of sequences of actions and utterances:
 - `docker-compose -p rpi_integration -f ./docker-compose.yml up`: runs the container and exposes server ports
 - `python -m unittest discover tests`: runs all the tests
 
+In order to test the HTM controller run:
+
+- `rostest rpi_integration test_htm_controller.test --text`
+
 ## Available actions
 
 If you are posting an action (“a”), then the valid list includes the following keys (you can, alternatively, post any of the below as a “u” using the value):

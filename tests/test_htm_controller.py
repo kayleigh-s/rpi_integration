@@ -66,6 +66,7 @@ class TestHTMPlanner(unittest.TestCase):
 
     def test_bottom_up_paramaterized(self):
 
+        # Ground truth
         param_query_answers   = [
             ['We are building a chair in order to Start'],
             ['We are building a seat in order to BUILD CHAIR'],
