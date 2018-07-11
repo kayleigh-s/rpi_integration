@@ -1,6 +1,6 @@
 #!/usr/bin/env python
-import sys
-sys.path.append("/home/michi/src/ros_devel_ws/src/rpi_integration/src")
+# import sys
+# sys.path.append("/home/michi/src/ros_devel_ws/src/rpi_integration/src")
 
 import os
 import threading
