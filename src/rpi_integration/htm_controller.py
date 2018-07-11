@@ -140,6 +140,8 @@ class HTMController(BaseController, RESTUtils):
         self.horizontal_queries = rospy.get_param(self.param_prefix + '/horizontal')
         self.stationary_queries = rospy.get_param(self.param_prefix + '/stationary')
 
+        self.testing            = rospy.get_param(self.param_prefix + '/testing', False)
+
         self.htm                = json_to_htm(self.json_path)
         self.last_r             = finished_request
 
@@ -156,13 +158,13 @@ class HTMController(BaseController, RESTUtils):
             self,
             use_left=True, #left=True,
             use_right=True, #right=True,
-            use_stt=self.use_stt, #speech=self.use_stt,
-            use_tts=False, #listen=False,
+            use_stt=False, #speech=self.use_stt,
+            use_tts=self.use_tts, #listen=False,
             recovery=True,
         )
         RESTUtils.__init__(self)
 
-	self.testing = True
+
         if self.testing:
             self.START_CMD      = True
         else:
@@ -303,7 +305,7 @@ class HTMController(BaseController, RESTUtils):
 
         responses = self._select_query(msg.transcript.lower().strip())
         for response in responses:
-            if self.use_stt:
+            if self.use_tts:
                 utterance        = SpeechRequest()
                 utterance.mode   = utterance.SAY
                 utterance.string = response
