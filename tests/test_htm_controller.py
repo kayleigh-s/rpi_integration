@@ -1,4 +1,6 @@
 #!/usr/bin/env python
+import sys
+sys.path.append("/home/michi/src/ros_devel_ws/src/rpi_integration/src")
 
 import unittest
 
@@ -13,6 +15,7 @@ class TestHTMPlanner(unittest.TestCase):
 
         self.controller         = HTMController()
         self.root               = self.controller.htm.root
+        self.to_ntrl_Name    = self.controller.to_natural_Name
 
         self.param_prefix       = "/rpi_integration"
 
@@ -27,29 +30,29 @@ class TestHTMPlanner(unittest.TestCase):
 
         # Ground truth
         param_query_answers = [
-        set(['In order to  BUILD CHAIR', 'First, we will BUILD BACK-OF-OBJECT',
-         'Then, we will BUILD SEAT',
-         'Finally, we will REQUEST-ACTION GIVE SCREWDRIVER']),
-        set(['In order to  BUILD SEAT',
-         'First, we will FASTEN ARTIFACT-LEGs TO SEAT',
-         'Then, we will BUILD ARTIFACT-LEG', 'Then, we will BUILD ARTIFACT-LEG',
-         'Then, we will BUILD ARTIFACT-LEG',
-         'Finally, we will BUILD ARTIFACT-LEG']),
-        set(['In order to  BUILD BACK-OF-OBJECT',
-         'First, we will FASTEN TOP ARTIFACTs TO BACK-OF-OBJECT',
-         'Then, we will FASTEN VERTICAL ARTIFACTs',
-         'Finally, we will BUILD TOP-OF-OBJECT']),
-        set(['In order to  BUILD TOP-OF-OBJECT',
-         'First, we will FASTEN(brackets)',
-         'Then, we will HOLD(dowel)',
-         'Then, we will GET(dowel-top)',
-         'Finally, we will Parallelized Subtasks of BUILD TOP-OF-OBJECT'])
+        set(['In order to %s' % self.to_ntrl_Name("BUILD CHAIR"), 'First, we will %s' % self.to_ntrl_Name("BUILD BACK-OF-OBJECT"),
+         'Then, we will %s' % self.to_ntrl_Name("BUILD SEAT"),
+         'Finally, we will %s' % self.to_ntrl_Name("REQUEST-ACTION GIVE SCREWDRIVER")]),
+        set(['In order to %s' % self.to_ntrl_Name("BUILD SEAT"),
+         'First, we will %s' % self.to_ntrl_Name("FASTEN ARTIFACT-LEGs TO SEAT"),
+         'Then, we will %s' % self.to_ntrl_Name("BUILD ARTIFACT-LEG"), 'Then, we will %s' % self.to_ntrl_Name("BUILD ARTIFACT-LEG"),
+         'Then, we will %s' % self.to_ntrl_Name("BUILD ARTIFACT-LEG"),
+         'Finally, we will %s' % self.to_ntrl_Name("BUILD ARTIFACT-LEG")]),
+        set(['In order to %s' % self.to_ntrl_Name("BUILD BACK-OF-OBJECT"),
+         'First, we will %s' % self.to_ntrl_Name("FASTEN TOP ARTIFACTs TO BACK-OF-OBJECT"),
+         'Then, we will %s' % self.to_ntrl_Name("FASTEN VERTICAL ARTIFACTs"),
+         'Finally, we will %s' % self.to_ntrl_Name("BUILD TOP-OF-OBJECT")]),
+        set(['In order to %s' % self.to_ntrl_Name("BUILD TOP-OF-OBJECT"),
+         'First, we will %s' % self.to_ntrl_Name("FASTEN(brackets)"),
+         'Then, we will %s' % self.to_ntrl_Name("HOLD(dowel)"),
+         'Then, we will %s' % self.to_ntrl_Name("GET(dowel-top)"),
+         'Finally, we will %s' % self.to_ntrl_Name("Parallelized Subtasks of BUILD TOP-OF-OBJECT")])
         ]
 
         build_chair_answer = set([
-            'Our task is to BUILD CHAIR',
-            'First, we will BUILD BACK-OF-OBJECT', 'Then, we will BUILD SEAT',
-            'Finally, we will REQUEST-ACTION GIVE SCREWDRIVER'
+            'Our task is to %s' % self.to_ntrl_Name("BUILD CHAIR"),
+            'First, we will %s' % self.to_ntrl_Name("BUILD BACK-OF-OBJECT"), 'Then, we will %s' % self.to_ntrl_Name("BUILD SEAT"),
+            'Finally, we will %s' % self.to_ntrl_Name("REQUEST-ACTION GIVE SCREWDRIVER")
         ])
 
         for q in self.top_down_queries:
@@ -69,14 +72,14 @@ class TestHTMPlanner(unittest.TestCase):
         # Ground truth
         param_query_answers   = [
             ['We are building a chair in order to Start'],
-            ['We are building a seat in order to BUILD CHAIR'],
-            ['We are building a back-of-object in order to BUILD CHAIR'],
-            ['We are building a top-of-object in order to BUILD BACK-OF-OBJECT']
+            ['We are building a seat in order to %s' % self.to_ntrl_Name("BUILD CHAIR")],
+            ['We are building a back-of-object in order to %s' % self.to_ntrl_Name("BUILD CHAIR")],
+            ['We are building a top-of-object in order to %s' % self.to_ntrl_Name("BUILD BACK-OF-OBJECT")]
         ]
 
 
         why_query_answer              = ['So that we can Start']
-        why_query_back_subtask_answer = ['So that we can BUILD CHAIR']
+        why_query_back_subtask_answer = ['So that we can %s' % self.to_ntrl_Name("BUILD CHAIR")]
 
         for q in self.bottom_up_queries:
             if '{}' in q:
