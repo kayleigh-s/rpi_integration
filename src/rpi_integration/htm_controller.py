@@ -146,7 +146,7 @@ class HTMController(BaseController, RESTUtils):
         self.do_query           = rospy.get_param(self.param_prefix + "/do_query", False)
         self._learner_pub       = rospy.Publisher('web_interface/json',
                                                   String, queue_size =10)
-        self._listen_sub        = rospy.Subscriber(self.SPEECH_SERVICE,
+        self._listen_sub        = rospy.Subscriber(self.STT_TOPIC, #self.SPEECH_SERVICE,
                                                    transcript, self._listen_query_cb)
 
         self.curr_parent        = None
@@ -154,10 +154,10 @@ class HTMController(BaseController, RESTUtils):
 
         BaseController.__init__(
             self,
-            left=True,
-            right=True,
-            speech=self.use_stt,
-            listen=False,
+            use_left=True, #left=True,
+            use_right=True, #right=True,
+            use_stt=self.use_stt, #speech=self.use_stt,
+            use_tts=False, #listen=False,
             recovery=True,
         )
         RESTUtils.__init__(self)
