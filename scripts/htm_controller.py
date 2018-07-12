@@ -1,7 +1,10 @@
+#!/usr/bin/env python
+
 import rospy
-from rpi_integration.htm_controoler import HTMController
+from rpi_integration.htm_controller import HTMController
 
 try:
+    rospy.loginfo("Running HTMController")
     controller = HTMController()
 
     if not controller.testing:

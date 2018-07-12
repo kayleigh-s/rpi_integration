@@ -194,6 +194,6 @@ include_directories(
 ## Add folders to be run by python nosetests
 # catkin_add_nosetests(test)
 if(CATKIN_ENABLE_TESTING)
-  find_package(rostest)
-  test/test_htm_controller.test
+  find_package(rostest REQUIRED)
+  add_rostest (tests/test_htm_controller.test)
 endif()

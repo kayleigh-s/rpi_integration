@@ -1,6 +1,4 @@
 #!/usr/bin/env python
-# import sys
-# sys.path.append("/home/michi/src/ros_devel_ws/src/rpi_integration/src")
 
 import os
 import threading
@@ -87,17 +85,17 @@ class HTMController(BaseController, RESTUtils):
 
     }
 
-    natural_Names = {
-        "GET(seat)":                "Get the seat.",
-        "GET(back)":                "Get the back.",
-        "GET(dowel)":               "Get a dowel.",
-        "GET(dowel-top)":           "Get the top dowel.",
-        "GET(FOOT_BRACKET)":        "Get a foot bracket.",
-        "GET(bracket-front)":       "Get a front bracket.",
-        "GET(bracket-top)":        "Get the top bracket.",
-        "GET(bracket-back-right)":  "Get the back right bracket.",
-        "GET(bracket-back-left)":   "Get the back left bracket.",
-        "GET(screwdriver)":         "Get a screwdriver.",
+    NATURAL_NAMES = {
+        "GET(seat)":                "Getting the seat.",
+        "GET(back)":                "Getting the back.",
+        "GET(dowel)":               "Getting a dowel.",
+        "GET(dowel-top)":           "Getting the top dowel.",
+        "GET(FOOT_BRACKET)":        "Getting a foot bracket.",
+        "GET(bracket-front)":       "Getting a front bracket.",
+        "GET(bracket-top)":        "Getting the top bracket.",
+        "GET(bracket-back-right)":  "Getting the back right bracket.",
+        "GET(bracket-back-left)":   "Getting the back left bracket.",
+        "GET(screwdriver)":         "Getting a screwdriver.",
         "HOLD(dowel)":              "Hold the dowel.",
         "HOLD(seat)":               "Hold the seat.",
         "HOLD(back)":               "Hold the back.",
@@ -112,7 +110,7 @@ class HTMController(BaseController, RESTUtils):
         "BUILD SEAT":               "Build the seat.",
         "BUILD ARTIFACT-LEG":       "Build a leg.",
         "FASTEN ARTIFACT-LEGs TO SEAT": "Fasten the legs to the seat.",
-        "BUILD BACK-OF-OBJECT": "Build the seat back.",
+        "BUILD BACK-OF-OBJECT": "Build chair back.",
         "BUILD TOP-OF-OBJECT": "Build the top part of the chiar.",
         "Parallelized Subtasks of BUILD TOP-OF-OBJECT": "Parallelize subtasks of building the top of the chiar.",
         "FASTEN VERTICAL ARTIFACTs": "Fastern dowels",
@@ -121,26 +119,20 @@ class HTMController(BaseController, RESTUtils):
         "FASTEN TOP ARTIFACTs TO BACK-OF-OBJECT": "Fasten the top part to the seat back"
     }
 
-    def to_natural_Name(self, name):
-        if name in self.natural_Names:
-            return self.natural_Names[name].lower()
-        else:
-            return name
 
     def __init__(self):
+        rospy.loginfo('READDY')
         self.param_prefix       = "/rpi_integration"
         self.json_path          = rospy.get_param(self.param_prefix + '/json_file')
 
         self.autostart          = rospy.get_param(self.param_prefix + '/autostart')
         self.use_stt            = rospy.get_param(self.param_prefix + '/use_stt', False)
-        self.use_tts            = rospy.get_param(self.param_prefix + '/use_tts', False)
+        self.use_tts            = rospy.get_param(self.param_prefix + '/use_tts', True)
 
         self.top_down_queries   = rospy.get_param(self.param_prefix + '/top_down')
         self.bottom_up_queries  = rospy.get_param(self.param_prefix + '/bottom_up')
         self.horizontal_queries = rospy.get_param(self.param_prefix + '/horizontal')
         self.stationary_queries = rospy.get_param(self.param_prefix + '/stationary')
-
-        self.testing            = rospy.get_param(self.param_prefix + '/testing', False)
 
         self.htm                = json_to_htm(self.json_path)
         self.last_r             = finished_request
@@ -154,13 +146,14 @@ class HTMController(BaseController, RESTUtils):
         self.curr_parent        = None
         self.lock               = Lock()
 
+
         BaseController.__init__(
             self,
-            use_left=True, #left=True,
-            use_right=True, #right=True,
-            use_stt=False, #speech=self.use_stt,
-            use_tts=self.use_tts, #listen=False,
-            recovery=True,
+            use_left=True,
+            use_right=True,
+            use_stt=False,
+            use_tts=self.use_tts,
+            recovery=False,
         )
         RESTUtils.__init__(self)
 
@@ -176,6 +169,11 @@ class HTMController(BaseController, RESTUtils):
         # self._train_learner_from_file()
         rospy.loginfo('Ready!')
 
+    def to_natural_Name(self, name):
+        if name in self.NATURAL_NAMES:
+            return self.NATURAL_NAMES[name].lower()
+        else:
+            return name
     @property
     def robot_actions(self):
         return self._get_actions(self.htm.root)
@@ -197,6 +195,7 @@ class HTMController(BaseController, RESTUtils):
                 if not spoken_flag:
                     rospy.loginfo("Waiting until query is done....")
                     spoken_flag = True
+
                 rospy.sleep(0.1)
 
 
@@ -304,15 +303,17 @@ class HTMController(BaseController, RESTUtils):
             return
 
         responses = self._select_query(msg.transcript.lower().strip())
+
         for response in responses:
             if self.use_tts:
                 utterance        = SpeechRequest()
                 utterance.mode   = utterance.SAY
                 utterance.string = response
 
+                rospy.loginfo("VERBALIZING UTTERANCE!!!!")
                 self.speech(utterance)
             else:
-                rospy.loginfo(utterance)
+                rospy.loginfo(response)
 
         with self.lock:
             self.LISTENING = False
@@ -374,7 +375,7 @@ class HTMController(BaseController, RESTUtils):
             response          = "You should {}".format(self.to_natural_Name(next_human_action.name))
             # set this so that you can ask follow up query (e.g. "why?"")
             self.curr_parent  = self.htm.find_parent_node(self.htm.root,
-                                                         self.next_human_action.idx)
+                                                          next_human_action.idx)
             responses.append(response)
 
         elif param_bottom_up:
@@ -397,7 +398,7 @@ class HTMController(BaseController, RESTUtils):
             else:
                 self.curr_parent = self.htm.find_parent_node(self.htm.root,
                                                              self.curr_action.idx)
-                response = "So that we can {}".format(self.to_natural_Name(self.curr_parent.name))
+                response = "We need to {}".format(self.to_natural_Name(self.curr_parent.name))
 
             responses.append(response)
 
