@@ -29,6 +29,7 @@
 
     <rosparam param = "rpi_integration/begin_task">
         [
+        "what are the tasks",
         "let's build a {}"
         ]
     </rosparam>
