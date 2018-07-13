@@ -529,7 +529,25 @@
                         ]
                     }
                 ]
+            },
+
+            {
+                "id": 62,
+                "parent": 0,
+                "name": "Build a table",
+                "combination": "Sequential",
+                "attributes": [],
+                "children": []
+            },
+            {
+                "id": 63,
+                "parent": 0,
+                "name": "Build a desk",
+                "combination": "Sequential",
+                "attributes": [],
+                "children": []
             }
+
         ]
     }
 }
