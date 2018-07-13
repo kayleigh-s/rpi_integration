@@ -69,33 +69,61 @@ class HTMController(BaseController, RESTUtils):
     HOLD_LEG ='hold_leg'
 
     OBJECT_DICT = {
-        "GET(seat)":                (   BRING, BaseController.LEFT, 198),
-        "GET(back)":                (   BRING, BaseController.LEFT, 201),
-        "GET(dowel)":              [(   BRING, BaseController.LEFT, 150),
-                                    (   BRING, BaseController.LEFT, 151),
-                                    (   BRING, BaseController.LEFT, 152),
-                                    (   BRING, BaseController.LEFT, 153),
-                                    (   BRING, BaseController.LEFT, 154),
-                                    (   BRING, BaseController.LEFT, 155)],
-        "GET(dowel-top)":           (   BRING, BaseController.LEFT, 156),
-        "GET(FOOT_BRACKET)":       [(   BRING, BaseController.RIGHT, 10),
-                                    (   BRING, BaseController.RIGHT, 11),
-                                    (   BRING, BaseController.RIGHT, 12),
-                                    (   BRING, BaseController.RIGHT, 13)],
-        "GET(bracket-front)":      [(   BRING, BaseController.RIGHT, 14),
-                                    (   BRING, BaseController.RIGHT, 15),
-                                    (   BRING, BaseController.RIGHT, 22),
-                                    (   BRING, BaseController.RIGHT, 23)],
-        "GET(bracket-top)":        [(   BRING, BaseController.RIGHT, 16),
-                                    (   BRING, BaseController.RIGHT, 17)],
-        "GET(bracket-back-right)":  (   BRING, BaseController.RIGHT, 18),
-        "GET(bracket-back-left)":   (   BRING, BaseController.RIGHT, 19),
-        "GET(screwdriver)":         (   BRING, BaseController.RIGHT, 20),
-        "HOLD(dowel)":              (HOLD_LEG, BaseController.RIGHT,  0),
-        "HOLD(seat)":               (HOLD_LEG, BaseController.RIGHT,  0),
-        "HOLD(back)":               (HOLD_LEG, BaseController.RIGHT,  0)
+        "Getting the seat":                 (   BRING, BaseController.LEFT, 198),
+        "Getting the back":                 (   BRING, BaseController.LEFT, 201),
+        "Getting a dowel":                 [(   BRING, BaseController.LEFT, 150),
+                                            (   BRING, BaseController.LEFT, 151),
+                                            (   BRING, BaseController.LEFT, 152),
+                                            (   BRING, BaseController.LEFT, 153),
+                                            (   BRING, BaseController.LEFT, 154),
+                                            (   BRING, BaseController.LEFT, 155)],
+        "Getting the top dowel":            (   BRING, BaseController.LEFT, 156),
+        "Getting the foot bracket":        [(   BRING, BaseController.RIGHT, 10),
+                                            (   BRING, BaseController.RIGHT, 11),
+                                            (   BRING, BaseController.RIGHT, 12),
+                                            (   BRING, BaseController.RIGHT, 13)],
+        "Getting the front bracket":       [(   BRING, BaseController.RIGHT, 14),
+                                            (   BRING, BaseController.RIGHT, 15),
+                                            (   BRING, BaseController.RIGHT, 22),
+                                            (   BRING, BaseController.RIGHT, 23)],
+        "Getting the top bracket":         [(   BRING, BaseController.RIGHT, 16),
+                                            (   BRING, BaseController.RIGHT, 17)],
+        "Getting the back right bracket":   (   BRING, BaseController.RIGHT, 18),
+        "Getting the back left bracket":    (   BRING, BaseController.RIGHT, 19),
+        "Getting a screwdriver":            (   BRING, BaseController.RIGHT, 20),
+        "Hold the dowel":                   (HOLD_LEG, BaseController.RIGHT,  0),
+        "Hold the seat":                    (HOLD_LEG, BaseController.RIGHT,  0),
+        "Hold the back":                    (HOLD_LEG, BaseController.RIGHT,  0)
 
     }
+    # OBJECT_DICT = {
+    #     "GET(seat)":                (   BRING, BaseController.LEFT, 198),
+    #     "GET(back)":                (   BRING, BaseController.LEFT, 201),
+    #     "GET(dowel)":              [(   BRING, BaseController.LEFT, 150),
+    #                                 (   BRING, BaseController.LEFT, 151),
+    #                                 (   BRING, BaseController.LEFT, 152),
+    #                                 (   BRING, BaseController.LEFT, 153),
+    #                                 (   BRING, BaseController.LEFT, 154),
+    #                                 (   BRING, BaseController.LEFT, 155)],
+    #     "GET(dowel-top)":           (   BRING, BaseController.LEFT, 156),
+    #     "GET(FOOT_BRACKET)":       [(   BRING, BaseController.RIGHT, 10),
+    #                                 (   BRING, BaseController.RIGHT, 11),
+    #                                 (   BRING, BaseController.RIGHT, 12),
+    #                                 (   BRING, BaseController.RIGHT, 13)],
+    #     "GET(bracket-front)":      [(   BRING, BaseController.RIGHT, 14),
+    #                                 (   BRING, BaseController.RIGHT, 15),
+    #                                 (   BRING, BaseController.RIGHT, 22),
+    #                                 (   BRING, BaseController.RIGHT, 23)],
+    #     "GET(bracket-top)":        [(   BRING, BaseController.RIGHT, 16),
+    #                                 (   BRING, BaseController.RIGHT, 17)],
+    #     "GET(bracket-back-right)":  (   BRING, BaseController.RIGHT, 18),
+    #     "GET(bracket-back-left)":   (   BRING, BaseController.RIGHT, 19),
+    #     "GET(screwdriver)":         (   BRING, BaseController.RIGHT, 20),
+    #     "HOLD(dowel)":              (HOLD_LEG, BaseController.RIGHT,  0),
+    #     "HOLD(seat)":               (HOLD_LEG, BaseController.RIGHT,  0),
+    #     "HOLD(back)":               (HOLD_LEG, BaseController.RIGHT,  0)
+
+    # }
 
     NATURAL_NAMES = {
         "GET(seat)":                "Getting the seat.",
@@ -104,7 +132,7 @@ class HTMController(BaseController, RESTUtils):
         "GET(dowel-top)":           "Getting the top dowel.",
         "GET(FOOT_BRACKET)":        "Getting a foot bracket.",
         "GET(bracket-front)":       "Getting a front bracket.",
-        "GET(bracket-top)":        "Getting the top bracket.",
+        "GET(bracket-top)":         "Getting the top bracket.",
         "GET(bracket-back-right)":  "Getting the back right bracket.",
         "GET(bracket-back-left)":   "Getting the back left bracket.",
         "GET(screwdriver)":         "Getting a screwdriver.",
@@ -123,8 +151,8 @@ class HTMController(BaseController, RESTUtils):
         "BUILD ARTIFACT-LEG":       "Build a leg.",
         "FASTEN ARTIFACT-LEGs TO SEAT": "Fasten the legs to the seat.",
         "BUILD BACK-OF-OBJECT": "Build chair back.",
-        "BUILD TOP-OF-OBJECT": "Build the top part of the chiar.",
-        "Parallelized Subtasks of BUILD TOP-OF-OBJECT": "Parallelize subtasks of building the top of the chiar.",
+        "BUILD TOP-OF-OBJECT": "Build the top part of the chair.",
+        "Parallelized Subtasks of BUILD TOP-OF-OBJECT": "Parallelized subtasks of building the top of the chair.",
         "FASTEN VERTICAL ARTIFACTs": "Fastern dowels",
         "FASTEN VERTICAL ARTIFACT": "Fastern a dowel",
         "FASTEN BACK-OF-OBJECT TO ARTIFACT": "Fasten the seat back to the chair",
@@ -187,7 +215,7 @@ class HTMController(BaseController, RESTUtils):
         else:
             return name
     @property
-    def robot_actions(self):
+    def robot_actions(self, node):
         return self._get_actions(self.htm.root)
 
     def _take_actions(self, actions):
@@ -365,7 +393,7 @@ class HTMController(BaseController, RESTUtils):
                 #response = "We need to do {} things".format(len(children_names))
                 #responses.append(response)
 
-                response = "First, we will {}".format(self.to_natural_Name(children_names.pop()))
+                response = "We will {}".format(self.to_natural_Name(children_names.pop()))
                 responses.append(response)
 
                 while(len(children_names) > 1):

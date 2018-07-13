@@ -4,7 +4,8 @@ import json
 import requests
 
 parser = argparse.ArgumentParser("Run the Learner on json training files")
-parser.add_argument('path', help='path to the model files')
+# parser.add_argument('path', help='path to the model files')
+parser.add_argument('-l', '--list', help='delimited list input', type=str)
 
 addr = "http://0.0.0.0:5002"
 get_addr = "{}/alpha/gettree".format(addr)
@@ -42,7 +43,9 @@ def delete():
 # gt = json.loads(text)
 args = parser.parse_args()
 delete()
-with open(args.path, "r") as i:
-    print("loading")
-    post(i)
-    print(get().text)
+fs = args.list.split(",")
+print(fs)
+for f in fs:
+    with open(f, "r") as i:
+        post(i)
+print(get().text)
