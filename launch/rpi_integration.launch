@@ -15,7 +15,7 @@
     <!-- print level (shared throughout the control code) -->
     <arg name="print_level" default="3"/>
     <!-- Name of the file that contains the task in json format -->
-    <arg name="json_file" default="$(find rpi_integration)/tests/out/full_chair.json" />
+    <arg name="json_file" default="$(find rpi_integration)/tests/out/full_chair_natural_name.json" />
     <!-- If to autostart control or to wait for an utterance from the user -->
     <arg name="autostart" default="false" />
     <!-- Disable some stuff if running tests -->
@@ -27,6 +27,7 @@
     <param name="rpi_integration/use_stt"   value="$(arg use_stt)"/>
     <param name="rpi_integration/testing"   value="$(arg testing)"/>
 
+    
     <rosparam param = "rpi_integration/top_down">
         [
         "what is the task",
