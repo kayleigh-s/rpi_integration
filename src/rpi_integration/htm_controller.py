@@ -1,4 +1,6 @@
 #!/usr/bin/env python
+# import sys
+# sys.path.append("/home/michi/src/ros_devel_ws/src/rpi_integration/src")
 
 import os
 import threading
@@ -85,8 +87,45 @@ class HTMController(BaseController, RESTUtils):
 
     }
 
+    natural_Names = {
+        "GET(seat)":                "Get the seat.",
+        "GET(back)":                "Get the back.",
+        "GET(dowel)":               "Get a dowel.",
+        "GET(dowel-top)":           "Get the top dowel.",
+        "GET(FOOT_BRACKET)":        "Get a foot bracket.",
+        "GET(bracket-front)":       "Get a front bracket.",
+        "GET(bracket-top)":        "Get the top bracket.",
+        "GET(bracket-back-right)":  "Get the back right bracket.",
+        "GET(bracket-back-left)":   "Get the back left bracket.",
+        "GET(screwdriver)":         "Get a screwdriver.",
+        "HOLD(dowel)":              "Hold the dowel.",
+        "HOLD(seat)":               "Hold the seat.",
+        "HOLD(back)":               "Hold the back.",
+        "FASTEN(brackets)":         "Fasten the brackets.",
+        "FASTEN(legs)":             "Fasten the legs.",
+        "FASTEN(back)":             "Fasten the back.",
+        "INSERT(dowel)":            "Insert a dowel.",
+        # "Start":                    "Let's start.",
+        "BUILD CHAIR":              "Build a chair.",
+        "Parallelized Subtasks of BUILD CHAIR": "Parallelize subtasks of building a chair.",
+        "REQUEST-ACTION GIVE SCREWDRIVER": "Retrieve a screwdriver",
+        "BUILD SEAT":               "Build the seat.",
+        "BUILD ARTIFACT-LEG":       "Build a leg.",
+        "FASTEN ARTIFACT-LEGs TO SEAT": "Fasten the legs to the seat.",
+        "BUILD BACK-OF-OBJECT": "Build the seat back.",
+        "BUILD TOP-OF-OBJECT": "Build the top part of the chiar.",
+        "Parallelized Subtasks of BUILD TOP-OF-OBJECT": "Parallelize subtasks of building the top of the chiar.",
+        "FASTEN VERTICAL ARTIFACTs": "Fastern dowels",
+        "FASTEN VERTICAL ARTIFACT": "Fastern a dowel",
+        "FASTEN BACK-OF-OBJECT TO ARTIFACT": "Fasten the seat back to the chair",
+        "FASTEN TOP ARTIFACTs TO BACK-OF-OBJECT": "Fasten the top part to the seat back"
+    }
 
-
+    def to_natural_Name(self, name):
+        if name in self.natural_Names:
+            return self.natural_Names[name].lower()
+        else:
+            return name
 
     def __init__(self):
         self.param_prefix       = "/rpi_integration"
@@ -96,6 +135,7 @@ class HTMController(BaseController, RESTUtils):
         self.use_stt            = rospy.get_param(self.param_prefix + '/use_stt', False)
         self.use_tts            = rospy.get_param(self.param_prefix + '/use_tts', False)
 
+        self.begin_task_queries   = rospy.get_param(self.param_prefix + '/begin_task')
         self.top_down_queries   = rospy.get_param(self.param_prefix + '/top_down')
         self.bottom_up_queries  = rospy.get_param(self.param_prefix + '/bottom_up')
         self.horizontal_queries = rospy.get_param(self.param_prefix + '/horizontal')
@@ -107,7 +147,7 @@ class HTMController(BaseController, RESTUtils):
         self.do_query           = rospy.get_param(self.param_prefix + "/do_query", False)
         self._learner_pub       = rospy.Publisher('web_interface/json',
                                                   String, queue_size =10)
-        self._listen_sub        = rospy.Subscriber(self.STT_TOPIC,
+        self._listen_sub        = rospy.Subscriber(self.STT_TOPIC, #self.SPEECH_SERVICE,
                                                    transcript, self._listen_query_cb)
 
         self.curr_parent        = None
@@ -115,19 +155,21 @@ class HTMController(BaseController, RESTUtils):
 
         BaseController.__init__(
             self,
-            use_left=True,
-            use_right=True,
-            use_stt=self.use_stt,
-            use_tts=False,
+            use_left=True, #left=True,
+            use_right=True, #right=True,
+            use_stt=self.use_stt, #speech=self.use_stt,
+            use_tts=False, #listen=False,
             recovery=True,
         )
         RESTUtils.__init__(self)
 
+	self.testing = True
         if self.testing:
             self.START_CMD      = True
         else:
             self.START_CMD      = False
 
+        self.START_TASK_CMD      = False
         self.LISTENING          = False
 
         # self.delete()
@@ -136,7 +178,7 @@ class HTMController(BaseController, RESTUtils):
 
     @property
     def robot_actions(self):
-        return self._get_actions(self.htm.root)
+        return self._get_actions(self.task_node.root)
 
     def _take_actions(self, actions):
         prev_arm      = None # was left or right arm used previously?
@@ -257,9 +299,20 @@ class HTMController(BaseController, RESTUtils):
             self.LISTENING = True
 
         if not self.START_CMD:
-            self._baxter_begin(msg.transcript.lower().strip())
+            # self._baxter_begin(msg.transcript.lower().strip())
+            self._baxter_begin_task(msg.transcript.lower().strip())
             self.LISTENING = False
-            return
+
+        # if not self.START_CMD:
+        #     response = self._baxter_begin_task(msg.transcript.lower().strip())
+        #     if self.use_stt:
+        #         utterance        = SpeechRequest()
+        #         utterance.mode   = utterance.SAY
+        #         utterance.string = response
+        #
+        #         self.speech(utterance)
+        #     else:
+        #         rospy.loginfo(utterance)
 
         responses = self._select_query(msg.transcript.lower().strip())
         for response in responses:
@@ -299,34 +352,37 @@ class HTMController(BaseController, RESTUtils):
                     return None
                 else:
                     children_names = [c.name for c in task.children]
-                    response       = "In order to  {}".format(task.name)
+                    response       = "In order to {}".format(self.to_natural_Name(task.name))
             else: # Not parameterized so go down HTM from top.
                 task           = self.htm.root.children[0]
                 children_names = [c.name for c in task.children]
-                response       = "Our task is to {}".format(task.name)
+                response       = "Our task is to {}".format(self.to_natural_Name(task.name))
 
             responses.append(response)
 
             if len(children_names) > 1:
-                response = "First, we will {}".format(children_names.pop())
+                #response = "We need to do {} things".format(len(children_names))
+                #responses.append(response)
+
+                response = "First, we will {}".format(self.to_natural_Name(children_names.pop()))
                 responses.append(response)
 
                 while(len(children_names) > 1):
-                    response = "Then, we will {}".format(children_names.pop())
+                    response = "Then, we will {}".format(self.to_natural_Name(children_names.pop()))
                     responses.append(response)
 
-                response = "Finally, we will {}".format(children_names.pop())
+                response = "Finally, we will {}".format(self.to_natural_Name(children_names.pop()))
                 responses.append(response)
 
             else:
-                response = "All we need to do is {}".format(children_names.pop())
+                response = "All we need to do is {}".format(self.to_natural_Name(children_names.pop()))
                 responses.append(response)
 
 
         elif param_horizontal:
             next_human_action = self.htm.find_next_human_action(self.htm.root,
                                                                 self.curr_action.idx)
-            response          = "You should {}".format(next_human_action.name)
+            response          = "You should {}".format(self.to_natural_Name(next_human_action.name))
             # set this so that you can ask follow up query (e.g. "why?"")
             self.curr_parent  = self.htm.find_parent_node(self.htm.root,
                                                          self.next_human_action.idx)
@@ -340,25 +396,25 @@ class HTMController(BaseController, RESTUtils):
             if isinstance(param_bottom_up, str):
                 node             = self.htm.find_node_by_name(self.htm.root, param_bottom_up)
                 self.curr_parent = self.htm.find_parent_node(self.htm.root, node.idx)
-                response         = "We are building a {} in order to {}".format(param_bottom_up,
-                                                                                self.curr_parent.name)
+                response         = "We are building a {} in order to {}".format(self.to_natural_Name(param_bottom_up),
+                                                                                self.to_natural_Name(self.curr_parent.name))
             elif transcript in "why": #  Response to "why" is conditional on previous query
                 if not self.curr_parent:
                     rospy.logwarn("Sorry, I didn't understand: \"{}\"".format(transcript))
                 else:
                     self.curr_parent = self.htm.find_parent_node(self.htm.root,
                                                                  self.curr_parent.idx)
-                    response = "So that we can {}".format(self.curr_parent.name)
+                    response = "So that we can {}".format(self.to_natural_Name(self.curr_parent.name))
             else:
                 self.curr_parent = self.htm.find_parent_node(self.htm.root,
                                                              self.curr_action.idx)
-                response = "So that we can {}".format(self.curr_parent.name)
+                response = "So that we can {}".format(self.to_natural_Name(self.curr_parent.name))
 
             responses.append(response)
 
 
         elif param_stationary:
-            response = "Currently, I am {}".format(self.curr_action.name)
+            response = "Currently, I am {}".format(self.to_natural_Name(self.curr_action.name))
             # set this so that you can ask follow up query (e.g. "why?"")
             self.curr_parent = self.htm.find_parent_node(self.htm.root,
                                                          self.curr_action.idx)
@@ -381,3 +437,16 @@ class HTMController(BaseController, RESTUtils):
             self.START_CMD = False  # than utter is probably None
 
         return
+
+    def _baxter_begin_task(self, transcript):
+        param_begin_task   = transcript_in_query_list(transcript, self.begin_task_queries)
+        # response        = None
+
+        if param_begin_task:
+            self.node_task = "build a {}".format(param_begin_task)
+            self.START_CMD = True
+            # response = "okay, let's build a {}".format(param_begin_task)
+        else:
+            rospy.logwarn("Sorry, I didn't understand: \"{}\"".format(transcript))
+            self.START_CMD = False
+        # return response
