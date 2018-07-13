@@ -169,6 +169,7 @@ class HTMController(BaseController, RESTUtils):
         self.use_stt            = rospy.get_param(self.param_prefix + '/use_stt', False)
         self.use_tts            = rospy.get_param(self.param_prefix + '/use_tts', True)
 
+        self.begin_task_queries   = rospy.get_param(self.param_prefix + '/begin_task')
         self.top_down_queries   = rospy.get_param(self.param_prefix + '/top_down')
         self.bottom_up_queries  = rospy.get_param(self.param_prefix + '/bottom_up')
         self.horizontal_queries = rospy.get_param(self.param_prefix + '/horizontal')
@@ -203,6 +204,7 @@ class HTMController(BaseController, RESTUtils):
         else:
             self.START_CMD      = False
 
+        self.START_TASK_CMD      = False
         self.LISTENING          = False
 
         # self.delete()
@@ -214,9 +216,8 @@ class HTMController(BaseController, RESTUtils):
             return self.NATURAL_NAMES[name].lower()
         else:
             return name
-    @property
-    def robot_actions(self, node):
-        return self._get_actions(self.htm.root)
+    def robot_actions(self):
+        return self._get_actions(self.task_node.root)
 
     def _take_actions(self, actions):
         prev_arm      = None # was left or right arm used previously?
@@ -338,8 +339,20 @@ class HTMController(BaseController, RESTUtils):
             self.LISTENING = True
 
         if not self.START_CMD:
-            self._baxter_begin(msg.transcript.lower().strip())
+            # self._baxter_begin(msg.transcript.lower().strip())
+            self._baxter_begin_task(msg.transcript.lower().strip())
             self.LISTENING = False
+
+        # if not self.START_CMD:
+        #     response = self._baxter_begin_task(msg.transcript.lower().strip())
+        #     if self.use_stt:
+        #         utterance        = SpeechRequest()
+        #         utterance.mode   = utterance.SAY
+        #         utterance.string = response
+        #
+        #         self.speech(utterance)
+        #     else:
+        #         rospy.loginfo(utterance)
 
         responses = self._select_query(msg.transcript.lower().strip())
 
@@ -437,7 +450,7 @@ class HTMController(BaseController, RESTUtils):
             else:
                 self.curr_parent = self.htm.find_parent_node(self.htm.root,
                                                              self.curr_action.idx)
-                response = "We need to {}".format(self.to_natural_Name(self.curr_parent.name))
+                response = "So that we can {}".format(self.to_natural_Name(self.curr_parent.name))
 
             responses.append(response)
 
@@ -466,3 +479,16 @@ class HTMController(BaseController, RESTUtils):
             self.START_CMD = False  # than utter is probably None
 
         return
+
+    def _baxter_begin_task(self, transcript):
+        param_begin_task   = transcript_in_query_list(transcript, self.begin_task_queries)
+        # response        = None
+
+        if param_begin_task:
+            self.node_task = "build a {}".format(param_begin_task)
+            self.START_CMD = True
+            # response = "okay, let's build a {}".format(param_begin_task)
+        else:
+            rospy.logwarn("Sorry, I didn't understand: \"{}\"".format(transcript))
+            self.START_CMD = False
+        # return response
