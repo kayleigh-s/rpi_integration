@@ -30,16 +30,28 @@ def transcript_in_query_list(transcript, query_list):
             q_list      = q.split()
             trans_list  = transcript.split()
 
-            param_index = q_list.index(param_indicator)
+            q_list.remove(param_indicator)
 
-            try:
-                q_list.pop(param_index)
-                param = trans_list.pop(param_index)
-            except IndexError: # Then the two lists dont match
-               continue
 
-            if trans_list == q_list:
+            if  not set(q_list).issubset(set(trans_list)):
+                continue
+            else:
+                param_list = [w for w in trans_list if w not in q_list]
+                param      = ' '.join(param_list)
+
                 return param
+
+            # param_index = q_list.index(param_indicator)
+
+            # try:
+            #     q_list.pop(param_index)
+            #     param = trans_list.pop(param_index)
+
+            # except IndexError: # Then the two lists dont match
+            #    continue
+
+            # if trans_list == q_list:
+            #     return param
 
         elif transcript in q:
             return True
@@ -300,7 +312,6 @@ class HTMController(BaseController, RESTUtils):
         if not self.START_CMD:
             self._baxter_begin(msg.transcript.lower().strip())
             self.LISTENING = False
-            return
 
         responses = self._select_query(msg.transcript.lower().strip())
 
