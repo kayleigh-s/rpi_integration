@@ -10,7 +10,7 @@
                 "id": 1,
                 "parent": 0,
                 "name": "build a chair",
-                "combination": "Sequential",
+                "combination": "Parallel",
                 "attributes": [],
                 "children": [
                     {
@@ -23,7 +23,7 @@
                             {
                                 "id": 3,
                                 "parent": 2,
-                                "name": "get a screwdriver",
+                                "name": "getting a screwdriver",
                                 "combination": "",
                                 "attributes": [
                                     "robot"
@@ -49,7 +49,7 @@
                                     {
                                         "id": 6,
                                         "parent": 5,
-                                        "name": "get a foot bracket",
+                                        "name": "getting a foot bracket",
                                         "combination": "",
                                         "attributes": [
                                             "robot"
@@ -59,7 +59,7 @@
                                     {
                                         "id": 7,
                                         "parent": 5,
-                                        "name": "get a front bracket",
+                                        "name": "getting a front bracket",
                                         "combination": "",
                                         "attributes": [
                                             "robot"
@@ -69,7 +69,7 @@
                                     {
                                         "id": 8,
                                         "parent": 5,
-                                        "name": "get a dowel",
+                                        "name": "getting a dowel",
                                         "combination": "",
                                         "attributes": [
                                             "robot"
@@ -108,7 +108,7 @@
                                     {
                                         "id": 13,
                                         "parent": 12,
-                                        "name": "get a foot bracket",
+                                        "name": "getting a foot bracket",
                                         "combination": "",
                                         "attributes": [
                                             "robot"
@@ -118,7 +118,7 @@
                                     {
                                         "id": 14,
                                         "parent": 12,
-                                        "name": "get a front bracket",
+                                        "name": "getting a front bracket",
                                         "combination": "",
                                         "attributes": [
                                             "robot"
@@ -128,7 +128,7 @@
                                     {
                                         "id": 15,
                                         "parent": 12,
-                                        "name": "get a dowel",
+                                        "name": "getting a dowel",
                                         "combination": "",
                                         "attributes": [
                                             "robot"
@@ -167,7 +167,7 @@
                                     {
                                         "id": 20,
                                         "parent": 19,
-                                        "name": "get a foot bracket",
+                                        "name": "getting a foot bracket",
                                         "combination": "",
                                         "attributes": [
                                             "robot"
@@ -177,7 +177,7 @@
                                     {
                                         "id": 21,
                                         "parent": 19,
-                                        "name": "get the back right bracket",
+                                        "name": "getting the back right bracket",
                                         "combination": "",
                                         "attributes": [
                                             "robot"
@@ -187,7 +187,7 @@
                                     {
                                         "id": 22,
                                         "parent": 19,
-                                        "name": "get a dowel",
+                                        "name": "getting a dowel",
                                         "combination": "",
                                         "attributes": [
                                             "robot"
@@ -226,7 +226,7 @@
                                     {
                                         "id": 27,
                                         "parent": 26,
-                                        "name": "get a foot bracket",
+                                        "name": "getting a foot bracket",
                                         "combination": "",
                                         "attributes": [
                                             "robot"
@@ -236,7 +236,7 @@
                                     {
                                         "id": 28,
                                         "parent": 26,
-                                        "name": "get the back left bracket",
+                                        "name": "getting the back left bracket",
                                         "combination": "",
                                         "attributes": [
                                             "robot"
@@ -246,7 +246,7 @@
                                     {
                                         "id": 29,
                                         "parent": 26,
-                                        "name": "get a dowel",
+                                        "name": "getting a dowel",
                                         "combination": "",
                                         "attributes": [
                                             "robot"
@@ -285,7 +285,7 @@
                                     {
                                         "id": 34,
                                         "parent": 33,
-                                        "name": "get the seat",
+                                        "name": "getting the seat",
                                         "combination": "",
                                         "attributes": [
                                             "robot"
@@ -319,7 +319,7 @@
                     {
                         "id": 38,
                         "parent": 1,
-                        "name": "build the seat back",
+                        "name": "build the chair back",
                         "combination": "Sequential",
                         "attributes": [],
                         "children": [
@@ -340,7 +340,7 @@
                                             {
                                                 "id": 40,
                                                 "parent": 63,
-                                                "name": "get the top bracket",
+                                                "name": "getting  top bracket",
                                                 "combination": "",
                                                 "attributes": [
                                                     "robot"
@@ -350,7 +350,7 @@
                                             {
                                                 "id": 41,
                                                 "parent": 63,
-                                                "name": "get the top bracket",
+                                                "name": "getting  top bracket",
                                                 "combination": "",
                                                 "attributes": [
                                                     "robot"
@@ -362,7 +362,7 @@
                                     {
                                         "id": 42,
                                         "parent": 39,
-                                        "name": "get the top dowel",
+                                        "name": "getting the top dowel",
                                         "combination": "",
                                         "attributes": [
                                             "robot"
@@ -408,7 +408,7 @@
                                             {
                                                 "id": 48,
                                                 "parent": 47,
-                                                "name": "get a dowel",
+                                                "name": "getting a dowel",
                                                 "combination": "",
                                                 "attributes": [
                                                     "robot"
@@ -447,7 +447,7 @@
                                             {
                                                 "id": 53,
                                                 "parent": 52,
-                                                "name": "get a dowel",
+                                                "name": "getting a dowel",
                                                 "combination": "",
                                                 "attributes": [
                                                     "robot"
@@ -479,14 +479,14 @@
                                     {
                                         "id": 57,
                                         "parent": 46,
-                                        "name": "fasten the seat back to the chair",
+                                        "name": "fasten the chair back to the chair",
                                         "combination": "Sequential",
                                         "attributes": [],
                                         "children": [
                                             {
                                                 "id": 58,
                                                 "parent": 57,
-                                                "name": "get the back",
+                                                "name": "getting the back",
                                                 "combination": "",
                                                 "attributes": [
                                                     "robot"
@@ -510,7 +510,7 @@
                             {
                                 "id": 60,
                                 "parent": 38,
-                                "name": "fasten the top part to the seat back",
+                                "name": "fasten the top part to the chair back",
                                 "combination": "Sequential",
                                 "attributes": [],
                                 "children": [
