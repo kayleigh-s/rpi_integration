@@ -28,7 +28,7 @@
         <arg name="use_rosbridge"      value="$(arg use_rosbridge)"/>
         <arg name="use_baxter_display" value="$(arg use_baxter_display)"/>
         <arg name="print_level"        value="$(arg print_level)"/>
-        <arg name="testing"            value="false" />
+        <arg name="testing"            value="true" />
     </include>
 
     <!-- TESTS -->

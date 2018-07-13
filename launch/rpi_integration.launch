@@ -3,7 +3,7 @@
     <!-- If to use the robot or not (useful for debugging) -->
     <arg name="use_robot" default="true"/>
     <!-- If to use the aruco stuff or not -->
-    <arg name="use_aruco" default="false"/>
+    <arg name="use_aruco" default="true"/>
     <!-- If to use the speech to text or not -->
     <arg name="use_tts" default="true"/>
     <!-- If to use the text to speech or not -->
@@ -13,7 +13,7 @@
     <!-- If to use baxter_display or not -->
     <arg name="use_baxter_display" default="true"/>
     <!-- print level (shared throughout the control code) -->
-    <arg name="print_level" default="0"/>
+    <arg name="print_level" default="3"/>
     <!-- Name of the file that contains the task in json format -->
     <arg name="json_file" default="$(find rpi_integration)/tests/out/full_chair.json" />
     <!-- If to autostart control or to wait for an utterance from the user -->
@@ -31,6 +31,7 @@
         [
         "what is the task",
         "how can we build a {}",
+        "how do we build a {}",
         "how is the {} built"
         ]
     </rosparam>
@@ -47,7 +48,7 @@
 
     <rosparam param = "rpi_integration/horizontal">
         [
-        "what should I do next"
+        "what should i do next"
         ]
     </rosparam>
 
@@ -69,7 +70,7 @@
         <arg name="print_level"        value="$(arg print_level)"/>
     </include>
 
-    <node pkg="rpi_integration" type="htm_controller.py" name="htm_controller" output="screen" unless='$(arg testing)'/>
+    <node pkg="rpi_integration" type="htm_controller.py" name="htm_controller" output="screen" unless='$(arg testing)' />
 
 </launch>
 
