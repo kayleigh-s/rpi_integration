@@ -69,31 +69,31 @@ class HTMController(BaseController, RESTUtils):
     HOLD_LEG ='hold_leg'
 
     OBJECT_DICT = {
-        "Getting the seat":                 (   BRING, BaseController.LEFT, 198),
-        "Getting the back":                 (   BRING, BaseController.LEFT, 201),
-        "Getting a dowel":                 [(   BRING, BaseController.LEFT, 150),
+        "getting the seat":                 (   BRING, BaseController.LEFT, 198),
+        "getting the back":                 (   BRING, BaseController.LEFT, 201),
+        "getting a dowel":                 [(   BRING, BaseController.LEFT, 150),
                                             (   BRING, BaseController.LEFT, 151),
                                             (   BRING, BaseController.LEFT, 152),
                                             (   BRING, BaseController.LEFT, 153),
                                             (   BRING, BaseController.LEFT, 154),
                                             (   BRING, BaseController.LEFT, 155)],
-        "Getting the top dowel":            (   BRING, BaseController.LEFT, 156),
-        "Getting the foot bracket":        [(   BRING, BaseController.RIGHT, 10),
+        "getting the top dowel":            (   BRING, BaseController.LEFT, 156),
+        "getting a foot bracket":        [(   BRING, BaseController.RIGHT, 10),
                                             (   BRING, BaseController.RIGHT, 11),
                                             (   BRING, BaseController.RIGHT, 12),
                                             (   BRING, BaseController.RIGHT, 13)],
-        "Getting the front bracket":       [(   BRING, BaseController.RIGHT, 14),
+        "getting a front bracket":       [(   BRING, BaseController.RIGHT, 14),
                                             (   BRING, BaseController.RIGHT, 15),
                                             (   BRING, BaseController.RIGHT, 22),
                                             (   BRING, BaseController.RIGHT, 23)],
-        "Getting the top bracket":         [(   BRING, BaseController.RIGHT, 16),
+        "getting a top bracket":         [(   BRING, BaseController.RIGHT, 16),
                                             (   BRING, BaseController.RIGHT, 17)],
-        "Getting the back right bracket":   (   BRING, BaseController.RIGHT, 18),
-        "Getting the back left bracket":    (   BRING, BaseController.RIGHT, 19),
-        "Getting a screwdriver":            (   BRING, BaseController.RIGHT, 20),
-        "Hold the dowel":                   (HOLD_LEG, BaseController.RIGHT,  0),
-        "Hold the seat":                    (HOLD_LEG, BaseController.RIGHT,  0),
-        "Hold the back":                    (HOLD_LEG, BaseController.RIGHT,  0)
+        "getting the back right bracket":   (   BRING, BaseController.RIGHT, 18),
+        "getting the back left bracket":    (   BRING, BaseController.RIGHT, 19),
+        "getting a screwdriver":            (   BRING, BaseController.RIGHT, 20),
+        "hold the dowel":                   (HOLD_LEG, BaseController.RIGHT,  0),
+        "hold the seat":                    (HOLD_LEG, BaseController.RIGHT,  0),
+        "hold the back":                    (HOLD_LEG, BaseController.RIGHT,  0)
 
     }
     # OBJECT_DICT = {
@@ -126,19 +126,19 @@ class HTMController(BaseController, RESTUtils):
     # }
 
     NATURAL_NAMES = {
-        "GET(seat)":                "Getting the seat.",
-        "GET(back)":                "Getting the back.",
-        "GET(dowel)":               "Getting a dowel.",
-        "GET(dowel-top)":           "Getting the top dowel.",
-        "GET(FOOT_BRACKET)":        "Getting a foot bracket.",
-        "GET(bracket-front)":       "Getting a front bracket.",
-        "GET(bracket-top)":         "Getting the top bracket.",
-        "GET(bracket-back-right)":  "Getting the back right bracket.",
-        "GET(bracket-back-left)":   "Getting the back left bracket.",
-        "GET(screwdriver)":         "Getting a screwdriver.",
-        "HOLD(dowel)":              "Hold the dowel.",
-        "HOLD(seat)":               "Hold the seat.",
-        "HOLD(back)":               "Hold the back.",
+        "GET(seat)":                "getting the seat.",
+        "GET(back)":                "getting the back.",
+        "GET(dowel)":               "getting a dowel.",
+        "GET(dowel-top)":           "getting the top dowel.",
+        "GET(FOOT_BRACKET)":        "getting a foot bracket.",
+        "GET(bracket-front)":       "getting a front bracket.",
+        "GET(bracket-top)":         "getting the top bracket.",
+        "GET(bracket-back-right)":  "getting the back right bracket.",
+        "GET(bracket-back-left)":   "getting the back left bracket.",
+        "GET(screwdriver)":         "getting a screwdriver.",
+        "HOLD(dowel)":              "hold the dowel.",
+        "HOLD(seat)":               "hold the seat.",
+        "HOLD(back)":               "hold the back.",
         "FASTEN(brackets)":         "Fasten the brackets.",
         "FASTEN(legs)":             "Fasten the legs.",
         "FASTEN(back)":             "Fasten the back.",
@@ -155,8 +155,8 @@ class HTMController(BaseController, RESTUtils):
         "Parallelized Subtasks of BUILD TOP-OF-OBJECT": "Parallelized subtasks of building the top of the chair.",
         "FASTEN VERTICAL ARTIFACTs": "Fastern dowels",
         "FASTEN VERTICAL ARTIFACT": "Fastern a dowel",
-        "FASTEN BACK-OF-OBJECT TO ARTIFACT": "Fasten the seat back to the chair",
-        "FASTEN TOP ARTIFACTs TO BACK-OF-OBJECT": "Fasten the top part to the seat back"
+        "FASTEN BACK-OF-OBJECT TO ARTIFACT": "Fasten the chair back to the chair",
+        "FASTEN TOP ARTIFACTs TO BACK-OF-OBJECT": "Fasten the top part to the chair back"
     }
 
 
@@ -216,8 +216,10 @@ class HTMController(BaseController, RESTUtils):
             return self.NATURAL_NAMES[name].lower()
         else:
             return name
+
+    @property
     def robot_actions(self):
-        return self._get_actions(self.task_node.root)
+        return self._get_actions(self.task_node)
 
     def _take_actions(self, actions):
         prev_arm      = None # was left or right arm used previously?
@@ -229,6 +231,7 @@ class HTMController(BaseController, RESTUtils):
         # Publishing the htm before anything
         self._learner_pub.publish(open(self.json_path, 'r').read())
 
+        rospy.loginfo("ACTIONS: {}".format(actions))
         for action in actions:
 
             spoken_flag = False
@@ -313,8 +316,8 @@ class HTMController(BaseController, RESTUtils):
         try:
             children = root.children
             # If parallel, then permute the action orders
-            if kind == 'Parallel':
-                shuffle(children)
+            # if kind == 'Parallel':
+            #     shuffle(children)
 
             # loop through all children and get their actions
             for child in children:
@@ -335,26 +338,17 @@ class HTMController(BaseController, RESTUtils):
 
     def _listen_query_cb(self, msg):
         rospy.loginfo("QUERY RECEIVED: {}".format(msg.transcript))
+        responses = []
+
         with self.lock:
             self.LISTENING = True
 
         if not self.START_CMD:
-            # self._baxter_begin(msg.transcript.lower().strip())
-            self._baxter_begin_task(msg.transcript.lower().strip())
+            response       = self._baxter_begin_task(msg.transcript.lower().strip())
             self.LISTENING = False
+            responses.append(response)
 
-        # if not self.START_CMD:
-        #     response = self._baxter_begin_task(msg.transcript.lower().strip())
-        #     if self.use_stt:
-        #         utterance        = SpeechRequest()
-        #         utterance.mode   = utterance.SAY
-        #         utterance.string = response
-        #
-        #         self.speech(utterance)
-        #     else:
-        #         rospy.loginfo(utterance)
-
-        responses = self._select_query(msg.transcript.lower().strip())
+        responses += self._select_query(msg.transcript.lower().strip())
 
         for response in responses:
             if self.use_tts:
@@ -362,7 +356,6 @@ class HTMController(BaseController, RESTUtils):
                 utterance.mode   = utterance.SAY
                 utterance.string = response
 
-                rospy.loginfo("VERBALIZING UTTERANCE!!!!")
                 self.speech(utterance)
             else:
                 rospy.loginfo(response)
@@ -379,12 +372,31 @@ class HTMController(BaseController, RESTUtils):
 
         # These check if the transcript are in one of the lists defined in param server.
         # these params code be strings, which indicates a match with a parameterized query.
+        param_begin_task = transcript_in_query_list(transcript, self.begin_task_queries)
         param_top_down   = transcript_in_query_list(transcript, self.top_down_queries)
         param_bottom_up  = transcript_in_query_list(transcript, self.bottom_up_queries)
         param_horizontal = transcript_in_query_list(transcript, self.horizontal_queries)
         param_stationary = transcript_in_query_list(transcript, self.stationary_queries)
 
-        if param_top_down:
+        if param_begin_task:
+            if not isinstance(param_begin_task, str):
+                children_names = [c.name for c in self.htm.root.children]
+                num_children   = len(children_names)
+                response       = "There are {} available tasks".format(num_children)
+
+                responses.append(response)
+
+                response = "We can "
+
+                for i, c in enumerate(children_names):
+                    if i == num_children - 1:
+                        response += " or {}.".format(c)
+                    else:
+                        response += c + ", "
+
+                responses.append(response)
+
+        elif param_top_down:
             if isinstance(param_top_down, str): # if true, then is paramaterized query
                 # Finds node associated with parameter
                 task = self.htm.find_node_by_name(self.htm.root, param_top_down)
@@ -402,23 +414,40 @@ class HTMController(BaseController, RESTUtils):
 
             responses.append(response)
 
-            if len(children_names) > 1:
-                #response = "We need to do {} things".format(len(children_names))
-                #responses.append(response)
-
-                response = "We will {}".format(self.to_natural_Name(children_names.pop()))
-                responses.append(response)
-
-                while(len(children_names) > 1):
-                    response = "Then, we will {}".format(self.to_natural_Name(children_names.pop()))
+            if task.kind == "Sequential":
+                if len(children_names) > 1:
+                    response = "We need to do {} things".format(len(children_names))
                     responses.append(response)
 
-                response = "Finally, we will {}".format(self.to_natural_Name(children_names.pop()))
-                responses.append(response)
+                    response = "We need to {}".format(self.to_natural_Name(children_names.pop()))
+                    responses.append(response)
 
-            else:
-                response = "All we need to do is {}".format(self.to_natural_Name(children_names.pop()))
-                responses.append(response)
+                    while(len(children_names) > 1):
+                        response = "Then, we need to {}".format(self.to_natural_Name(children_names.pop()))
+                        responses.append(response)
+
+                    response = "Finally, we need to {}".format(self.to_natural_Name(children_names.pop()))
+                    responses.append(response)
+
+                else:
+                    response = "All we need to do is {}".format(self.to_natural_Name(children_names.pop()))
+                    responses.append(response)
+            # Because task is parallel, we don't want to enforce ordering.
+            elif task.kind == "Parallel":
+                if len(children_names) > 1:
+                    num_children = len(children_names)
+                    response     = "We need to do {} things, ".format(num_children)
+
+                    for i,c in enumerate(children_names):
+                        if i == num_children - 1:
+                            response += "and {}".format(c)
+                        else:
+                            response += "{}, ".format(c)
+                    responses.append(response)
+                else:
+                    response = "All we need to do is {}".format(self.to_natural_Name(children_names.pop()))
+                    responses.append(response)
+
 
 
         elif param_horizontal:
@@ -450,7 +479,9 @@ class HTMController(BaseController, RESTUtils):
             else:
                 self.curr_parent = self.htm.find_parent_node(self.htm.root,
                                                              self.curr_action.idx)
-                response = "So that we can {}".format(self.to_natural_Name(self.curr_parent.name))
+                action = self.to_natural_Name(self.curr_parent.name)
+                action = re.sub(r"^[B|b]uild", "building", action)
+                response = "We are {}".format(action)
 
             responses.append(response)
 
@@ -484,11 +515,14 @@ class HTMController(BaseController, RESTUtils):
         param_begin_task   = transcript_in_query_list(transcript, self.begin_task_queries)
         # response        = None
 
-        if param_begin_task:
-            self.node_task = "build a {}".format(param_begin_task)
+        if param_begin_task and isinstance(param_begin_task, str):
+            task_name      = "build a {}".format(param_begin_task)
+            self.task_node = self.htm.find_node_by_name(self.htm.root, task_name)
             self.START_CMD = True
-            # response = "okay, let's build a {}".format(param_begin_task)
+            response = "okay, let's build a {}".format(param_begin_task)
         else:
             rospy.logwarn("Sorry, I didn't understand: \"{}\"".format(transcript))
             self.START_CMD = False
-        # return response
+            response = "Sorry, there's no such task as: \"{}\"".format(transcript)
+
+        return response
