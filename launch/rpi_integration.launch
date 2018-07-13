@@ -27,6 +27,12 @@
     <param name="rpi_integration/use_stt"   value="$(arg use_stt)"/>
     <param name="rpi_integration/testing"   value="$(arg testing)"/>
 
+    <rosparam param = "rpi_integration/begin_task">
+        [
+        "let's build a {}"
+        ]
+    </rosparam>
+
     <rosparam param = "rpi_integration/top_down">
         [
         "what is the task",
@@ -72,4 +78,3 @@
     <node pkg="rpi_integration" type="htm_controller.py" name="htm_controller" output="screen" unless='$(arg testing)'/>
 
 </launch>
-
