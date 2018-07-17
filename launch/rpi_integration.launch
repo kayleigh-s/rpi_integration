@@ -39,6 +39,7 @@
         "what is the task",
         "how can we build a {}",
         "how do we build a {}",
+        "how do we build the {}",
         "how is the {} built"
         ]
     </rosparam>
