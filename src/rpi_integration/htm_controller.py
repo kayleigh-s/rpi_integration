@@ -41,17 +41,6 @@ def transcript_in_query_list(transcript, query_list):
 
                 return param
 
-            # param_index = q_list.index(param_indicator)
-
-            # try:
-            #     q_list.pop(param_index)
-            #     param = trans_list.pop(param_index)
-
-            # except IndexError: # Then the two lists dont match
-            #    continue
-
-            # if trans_list == q_list:
-            #     return param
 
         elif transcript in q:
             return True
@@ -277,20 +266,6 @@ class HTMController(BaseController, RESTUtils):
             prev_arm = arm
 
 
-    def _get_queried_htm(self):
-        cmd1 = '[["u", "We will build the back first."]]'
-        cmd2 = '[["u", "We will build the screwdriver first."]]'
-
-        self._learner_pub.publish(self.get().text)
-        if self.listen_sub.wait_for_msg(timeout=20.):
-            rospy.loginfo("Received do_query command...")
-            self.query(cmd1)
-            rospy.loginfo("Query 1 result: {}".format(self.get().text))
-            self.query(cmd2)
-            rospy.loginfo("Query 2 result: {}".format(self.get().text))
-            self._learner_pub.publish(self.get().text)
-            htm = _learner_to_htm()
-            return htm
 
     def _run(self):
         rospy.loginfo('Starting autonomous control')
@@ -527,12 +502,11 @@ class HTMController(BaseController, RESTUtils):
         # response        = None
 
         if param_begin_task and isinstance(param_begin_task, str):
-            task_name      = "build a {}".format(param_begin_task)
+            task_name      = "{}".format(param_begin_task)
             self.task_node = self.htm.find_node_by_name(self.htm.root, task_name)
             self.START_CMD = True
             response = "okay, let's build a {}".format(param_begin_task)
         else:
-            rospy.logwarn("Sorry, I didn't understand: \"{}\"".format(transcript))
             self.START_CMD = False
             response = ''
         return response
