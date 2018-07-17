@@ -91,9 +91,9 @@ class HTMController(BaseController, RESTUtils):
         "getting the back right bracket":   (   BRING, BaseController.RIGHT, 18),
         "getting the back left bracket":    (   BRING, BaseController.RIGHT, 19),
         "getting a screwdriver":            (   BRING, BaseController.RIGHT, 20),
-        "hold the dowel":                   (HOLD_LEG, BaseController.RIGHT,  0),
-        "hold the seat":                    (HOLD_LEG, BaseController.RIGHT,  0),
-        "hold the back":                    (HOLD_LEG, BaseController.RIGHT,  0)
+        "holding the dowel":                   (HOLD_LEG, BaseController.RIGHT,  0),
+        "holding the seat":                    (HOLD_LEG, BaseController.RIGHT,  0),
+        "holding the back":                    (HOLD_LEG, BaseController.RIGHT,  0)
 
     }
     # OBJECT_DICT = {
@@ -136,10 +136,10 @@ class HTMController(BaseController, RESTUtils):
         "GET(bracket-back-right)":  "getting the back right bracket.",
         "GET(bracket-back-left)":   "getting the back left bracket.",
         "GET(screwdriver)":         "getting a screwdriver.",
-        "HOLD(dowel)":              "hold the dowel.",
-        "HOLD(seat)":               "hold the seat.",
-        "HOLD(back)":               "hold the back.",
-        "FASTEN(brackets)":         "Fasten the brackets.",
+        "HOLD(dowel)":              "holding the dowel.",
+        "HOLD(seat)":               "holding the seat.",
+        "HOLD(back)":               "holding the back.",
+        "FASTEN(brackets)":         "Let me hold the dowel so that you can fasten the foot bracket to it.",
         "FASTEN(legs)":             "Fasten the legs.",
         "FASTEN(back)":             "Fasten the back.",
         "INSERT(dowel)":            "Insert a dowel.",
@@ -151,12 +151,12 @@ class HTMController(BaseController, RESTUtils):
         "BUILD ARTIFACT-LEG":       "Build a leg.",
         "FASTEN ARTIFACT-LEGs TO SEAT": "Fasten the legs to the seat.",
         "BUILD BACK-OF-OBJECT": "Build chair back.",
-        "BUILD TOP-OF-OBJECT": "Build the top part of the chair.",
-        "Parallelized Subtasks of BUILD TOP-OF-OBJECT": "Parallelized subtasks of building the top of the chair.",
+        "BUILD TOP-OF-OBJECT": "Build the top piece of the chair.",
+        "Parallelized Subtasks of BUILD TOP-OF-OBJECT": "getting the top brackets",
         "FASTEN VERTICAL ARTIFACTs": "Fastern dowels",
         "FASTEN VERTICAL ARTIFACT": "Fastern a dowel",
         "FASTEN BACK-OF-OBJECT TO ARTIFACT": "Fasten the chair back to the chair",
-        "FASTEN TOP ARTIFACTs TO BACK-OF-OBJECT": "Fasten the top part to the chair back"
+        "FASTEN TOP ARTIFACTs TO BACK-OF-OBJECT": "Fasten the top piece to the chair back"
     }
 
 
@@ -242,7 +242,6 @@ class HTMController(BaseController, RESTUtils):
 
                 rospy.sleep(0.1)
 
-
             # From the name we can get correct ROS service
             cmd, arm, obj = parse_action(action.name, self.OBJECT_DICT)
             arm_str       = "LEFT" if arm == 0 else 'RIGHT'
@@ -297,6 +296,8 @@ class HTMController(BaseController, RESTUtils):
         rospy.loginfo('Starting autonomous control')
         # rospy.sleep(3) # Add a little delay for self-filming!
         if self.autostart:
+            # Autostart by starting from chair subtree
+            self.task_node = self.htm.find_node_by_name(self.htm.root, "build a chair")
             self._take_actions(self.robot_actions)
         else:
             spoken_flag = False
@@ -419,18 +420,28 @@ class HTMController(BaseController, RESTUtils):
                     response = "We need to do {} things".format(len(children_names))
                     responses.append(response)
 
-                    response = "We need to {}".format(self.to_natural_Name(children_names.pop()))
+                    action   = self.to_natural_Name(children_names.pop(0))
+                    action   = re.sub(r"(ting|ing)", "", action)
+                    response = "We need to {}".format(action)
                     responses.append(response)
 
                     while(len(children_names) > 1):
-                        response = "Then, we need to {}".format(self.to_natural_Name(children_names.pop()))
+                        action   = self.to_natural_Name(children_names.pop(0))
+                        action   = re.sub(r"(ting|ing)", "", action)
+                        response = "Then, we need to {}".format(action)
                         responses.append(response)
 
-                    response = "Finally, we need to {}".format(self.to_natural_Name(children_names.pop()))
+                    action   = self.to_natural_Name(children_names.pop(0))
+                    action   = re.sub(r"(ting|ing)", "", action)
+
+                    response = "Finally, we need to {}".format(action)
                     responses.append(response)
 
                 else:
-                    response = "All we need to do is {}".format(self.to_natural_Name(children_names.pop()))
+                    action   = self.to_natural_Name(children_names.pop(0))
+                    action   = re.sub(r"(ting|ing)", "", action)
+
+                    response = "All we need to do is {}".format(action)
                     responses.append(response)
             # Because task is parallel, we don't want to enforce ordering.
             elif task.kind == "Parallel":
@@ -445,7 +456,7 @@ class HTMController(BaseController, RESTUtils):
                             response += "{}, ".format(c)
                     responses.append(response)
                 else:
-                    response = "All we need to do is {}".format(self.to_natural_Name(children_names.pop()))
+                    response = "All we need to do is {}".format(self.to_natural_Name(children_names.pop(0)))
                     responses.append(response)
 
 
@@ -523,6 +534,5 @@ class HTMController(BaseController, RESTUtils):
         else:
             rospy.logwarn("Sorry, I didn't understand: \"{}\"".format(transcript))
             self.START_CMD = False
-            response = "Sorry, there's no such task as: \"{}\"".format(transcript)
-
+            response = ''
         return response
