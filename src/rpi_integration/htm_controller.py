@@ -15,7 +15,7 @@ import rospy
 from human_robot_collaboration.controller import BaseController
 from human_robot_collaboration.service_request import finished_request
 from ros_speech2text.msg import transcript
-from rpi_integration.learner_utils import RESTUtils, parse_action
+from rpi_integration.learner_utils import RESTLearnerUtils, parse_action
 from std_msgs.msg import String
 
 def transcript_in_query_list(transcript, query_list):
@@ -48,7 +48,7 @@ def transcript_in_query_list(transcript, query_list):
     return False
 
 
-class HTMController(BaseController, RESTUtils):
+class HTMController(BaseController, RESTLearnerUtils):
     """Controls Baxter using HTN derived from json"""
 
     strt_time = time.time()
@@ -185,7 +185,7 @@ class HTMController(BaseController, RESTUtils):
             use_tts=self.use_tts,
             recovery=False,
         )
-        RESTUtils.__init__(self)
+        RESTLearnerUtils.__init__(self)
 
 
         if self.testing:

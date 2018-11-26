@@ -10,7 +10,7 @@ import rospy
 from human_robot_collaboration.controller import BaseController
 from human_robot_collaboration.subscribers import CommunicationSubscriber
 from ros_speech2text.msg import transcript
-from rpi_integration.learner_utils import RESTUtils, parse_action
+from rpi_integration.learner_utils import RESTLearnerUtils, parse_action
 from std_msgs.msg import String
 
 parser = argparse.ArgumentParser("Streams data from input file to learner")
@@ -21,7 +21,7 @@ parser.add_argument(
         os.path.abspath(os.path.dirname(__file__)),
         "../tests/in/full_chair.json"))
 
-class StreamingController(RESTUtils, BaseController):
+class StreamingController(RESTLearnerUtils, BaseController):
 
     BRING = 'get_pass'
     HOLD_TOP = 'hold_top'
@@ -57,7 +57,7 @@ class StreamingController(RESTUtils, BaseController):
         """
         Trains learner incrementally from file and sends actions to robot as they occur.
         """
-        RESTUtils.__init__(self)
+        RESTLearnerUtils.__init__(self)
         BaseController.__init__(self, left=True, right=True, speech=False,
                                              listen=True, recovery=True)
         self._lock = Lock()

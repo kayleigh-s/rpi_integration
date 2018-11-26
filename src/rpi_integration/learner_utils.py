@@ -16,12 +16,12 @@ def parse_action(act, obj_dict):
     return cmd, arm, obj
 
 
-class RESTUtils(object):
+class RESTLearnerUtils(object):
     def __init__(self):
         """REST API for interfacing with learner"""
         addr = "http://0.0.0.0:5002"
 
-        self.post_addr = addr + "/learn"
+        self.learn_addr = addr + "/learn"
         self.delete_addr = addr + "/alpha/reset"
         self.get_addr = addr + "/alpha/gettree?format=json"
         self.query_addr = addr + "/query"
@@ -34,7 +34,7 @@ class RESTUtils(object):
     def learn(self, data):
         """Sends a POST request to learn a new HTN (or update the previous one)
         from a sequence of actions and utterances."""
-        req = requests.post(url=self.post_addr, data=data, headers=self.HEADER)
+        req = requests.post(url=self.learn_addr, data=data, headers=self.HEADER)
         return req
 
     def get(self):

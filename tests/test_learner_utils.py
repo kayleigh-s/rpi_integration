@@ -8,7 +8,7 @@ from io import open
 
 import requests
 from task_models.json_to_htm import json_to_htm
-from rpi_integration.learner_utils import RESTUtils
+from rpi_integration.learner_utils import RESTLearnerUtils
 
 
 class TestLearnerUtils(unittest.TestCase):
@@ -22,7 +22,7 @@ class TestLearnerUtils(unittest.TestCase):
 
         self.curdir = os.path.dirname(os.path.abspath(__file__))
         self.maxDiff = None
-        self.rest_utils = RESTUtils()
+        self.rest_utils = RESTLearnerUtils()
 
 
     def _compare_from_file(self, f):
