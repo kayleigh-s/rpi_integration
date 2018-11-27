@@ -1,0 +1,59 @@
+launch>
+    <!-- INPUT ARGUMENTS -->
+    <!-- If to use the robot or not (useful for debugging) -->
+    <arg name="use_robot" default="false"/>
+    <!-- If to use the aruco stuff or not -->
+    <arg name="use_aruco" default="false"/>
+    <!-- If to use the speech to text or not -->
+    <arg name="use_tts" default="false"/>
+    <!-- If to use the text to speech or not -->
+    <arg name="use_stt" default="false"/>
+    <!-- If to use rosbridge server or not -->
+    <arg name="use_rosbridge" default="true"/>
+    <!-- If to use baxter_display or not -->
+    <arg name="use_baxter_display" default="true"/>
+    <!-- print level (shared throughout the control code) -->
+    <arg name="print_level" default="3"/>
+    <!-- Name of the file that contains the task in json format -->
+    <arg name="json_file" default="$(find rpi_integration)/tests/out/full_chair_natural_name.json" />
+    <!-- If to autostart control or to wait for an utterance from the user -->
+    <arg name="autostart" default="false" />
+    <!-- Disable some stuff if running tests -->
+    <arg name="testing" default="false" />
+    <!-- Determines whether face tracking overlay is displayed -->
+    <arg name="show_screen" default="true" />
+    <!-- Determines threshold (btwn 0 and 1) for determining if a face has been recognized -->
+    <arg name="conf_value" default="0.8" />
+
+    <!-- ROS PARAMETERS -->
+    <param name="rpi_integration/autostart" value="$(arg autostart)"/>
+    <param name="rpi_integration/use_stt"   value="$(arg use_stt)"/>
+    <param name="rpi_integration/testing"   value="$(arg testing)"/>
+
+    <param name="~confidence_value" type="double" value="$(arg conf_value)" />
+    <param name="~show_screen_flag" value="$(arg show_screen)"/>
+
+
+    <!-- NODES -->
+    <include file="$(find human_robot_collaboration)/launch/chair_task.launch" >
+        <arg name="use_robot"          value="$(arg use_robot)"/>
+        <arg name="use_aruco"          value="$(arg use_aruco)"/>
+        <arg name="use_tts"            value="$(arg use_tts)"/>
+        <arg name="use_stt"            value="$(arg use_stt)"/>
+        <arg name="use_rosbridge"      value="$(arg use_rosbridge)"/>
+        <arg name="use_baxter_display" value="$(arg use_baxter_display)"/>
+        <arg name="print_level"        value="$(arg print_level)"/>
+    </include>
+    
+    <node pkg="usb_cam" type="usb_came_node" name="usb_cam_node" output="screen">
+      <param name="usb_cam_node/image_raw" value="camera/image_raw"/>
+      <!-- <param name="_image_height" value="<usb_cam_height>"> -->
+      <!-- <param name="_image_width" value="<usb_cam_width>"> -->
+    </node>
+
+    <node pkg="face_recognition" type="Fserver" name="Fserver" output="screen"  />
+    <node pkg="face_recognition" type="Fclient" name="Fclient" output="screen"  />
+
+    <node pkg="rpi_integration" type="ontosem_controller.py" name="htm_controller" output="screen" />
+
+</launch>
