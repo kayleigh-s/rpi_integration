@@ -16,17 +16,58 @@ def parse_action(act, obj_dict):
     return cmd, arm, obj
 
 
+class RESTOntoSemUtils(object):
+    """REST API for interfacing with learner"""
+    def __init__(self):
+
+        addr = "http://0.0.0.0:5002"
+        self.POST_bootstrap_addr       = addr + "/yale/bootstrap"
+        self.POST_visual_input_addr    = addr + "/yale/visual-input"
+        self.POST_action_callback_addr = addr + "/iidea/callback"
+        self.GET_action_command_addr   = addr + "/iidea/command"
+
+        self.HEADER = {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+        }
+
+    def _POST(self, addr, data):
+        req = requests.post(url=addr, data=data, headers=self.HEADER)
+        return req
+
+    def _GET(self, addr):
+        """Sends a GET request to retrieve the current HTN."""
+        req = requests.get(url=addr)
+        return req
+
+    def POST_bootstrap_ontosem(self, id_dict):
+        return self._POST(self.POST_bootstrap_addr, id_dict)
+
+    def POST_visible_objects(self, obj_dict):
+        return self._POST(self.POST_visual_input_addr, obj_dict)
+
+    def POST_completed_action(self, act_dict):
+        return self._POST(self.POST_action_callback_addr, act_dict)
+
+    def GET_action_command(self):
+        return self._GET(self.GET_action_command_addr)
+
+
+
+
+
+
 class RESTLearnerUtils(object):
     def __init__(self):
         """REST API for interfacing with learner"""
         addr = "http://0.0.0.0:5002"
 
-        self.learn_addr = addr + "/learn"
+        self.learn_addr  = addr + "/learn"
         self.delete_addr = addr + "/alpha/reset"
-        self.get_addr = addr + "/alpha/gettree?format=json"
-        self.query_addr = addr + "/query"
+        self.get_addr    = addr + "/alpha/gettree?format =json"
+        self.query_addr  = addr + "/query"
 
-        self.HEADER = {
+        self.HEADER      = {
             'Content-Type': 'application/json',
             'Accept': 'application/json',
         }
