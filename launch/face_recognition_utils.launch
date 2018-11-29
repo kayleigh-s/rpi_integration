@@ -1,0 +1,18 @@
+<launch>
+    <!-- Determines whether face tracking overlay is displayed -->
+    <arg name="show_screen" default="$(arg show_screen)" />
+    <!-- Determines threshold (btwn 0 and 1) for determining if a face has been recognized -->
+    <arg name="conf_value" default="$(arg conf_value)" />
+
+    <node pkg="usb_cam" type="usb_cam_node" name="usb_cam" output="screen">
+      <param name="usb_cam_node/image_raw" value="camera/image_raw"/>
+      <!-- <param name="_image_height" value="<usb_cam_height>"> -->
+      <!-- <param name="_image_width" value="<usb_cam_width>"> -->
+    </node>
+
+    <node pkg="face_recognition" type="Fserver" name="face_recognition" output="screen" >
+      <param name="confidence_value" value="$(arg conf_value)"/>
+      <param name="show_screen_flag" value="$(arg show_screen)"/>
+    </node>
+    <!-- <node pkg="face_recognition" type="Fclient" name="Fclient" output="screen"/> -->
+</launch>
