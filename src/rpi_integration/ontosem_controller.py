@@ -1,7 +1,7 @@
 import rospy
 import actionlib
 
-# from face_recognition.msg import FRClientGoal
+# Documentation here: http://wiki.ros.org/face_recognition
 from face_recognition.msg import FaceRecognitionGoal, FaceRecognitionAction, FRClientGoal
 
 from svox_tts.srv import Speech, SpeechRequest
@@ -11,6 +11,11 @@ from ros_speech2text.msg import transcript
 
 
 class OntoSemController(BaseController, RESTOntoSemUtils):
+    """
+    Sends and receives commands from OntoSem cogntiive architecture to Baxter robot
+    """
+
+    # These are used by face recognition software
     RECOGNIZE_ONCE = 0
     RECOGNIZE_CONT = 1
     LEARN_FACE     = 2
@@ -18,6 +23,7 @@ class OntoSemController(BaseController, RESTOntoSemUtils):
     DUMMY_STRING   = 'none'
 
     def __init__(self):
+        # Get the parameters from launchfile
         self.param_prefix = "/rpi_integration"
         self.autostart    = rospy.get_param(self.param_prefix + '/autostart')
         self.use_stt      = rospy.get_param(self.param_prefix + '/use_stt', False)
@@ -29,7 +35,8 @@ class OntoSemController(BaseController, RESTOntoSemUtils):
         self.storage_1    = rospy.get_param("action_provider/objects_left").values()
         self.storage_2    =  rospy.get_param("action_provider/objects_right").values()
 
-        self._listen_sub        = rospy.Subscriber(self.STT_TOPIC, #self.SPEECH_SERVICE,
+        # Listens for speech commands from microphone
+        self._listen_sub  = rospy.Subscriber(self.STT_TOPIC, #self.SPEECH_SERVICE,
                                                    transcript, self._listen_query_cb)
         BaseController.__init__(
             self,
@@ -52,7 +59,7 @@ class OntoSemController(BaseController, RESTOntoSemUtils):
         visual_dict = {
             "storage-1": self.storage_1,
             "storage-2": self.storage_2,
-            "faces": self._get_faces()
+            "faces":     self._get_faces()
         }
 
         rospy.loginfo("DICT: {}".format(visual_dict))
@@ -65,16 +72,21 @@ class OntoSemController(BaseController, RESTOntoSemUtils):
     def _bootstrap(self):
         "Sends OntoSem initial 'bootstrap' info about workspace"
         bootstrap_dict = {}
+        # We assume that initially that the workspace is consistent with the launchfile
         bootstrap_dict.update(rospy.get_param("action_provider/objects_left"))
         bootstrap_dict.update(rospy.get_param("action_provider/objects_right"))
 
-        faces = rospy.get_param(self.param_prefix + '/all_faces')
+        faces                   = rospy.get_param(lf.param_prefix + '/all_faces')
         bootstrap_dict['faces'] = faces
 
         rospy.loginfo(bootstrap_dict)
 
+        # NOTE: Uncomment when running OntoSem
         # self.POST_bootstrap_ontosem(bootstrap_dict)
 
+
+    # The face_recognition package uses actionlib (http://wiki.ros.org/actionlib) to send
+    # messages, which allows for these optional callback  to be passed
     def _active_cb(self):
         rospy.loginfo("GOAL IS ACTIVE")
 
@@ -95,14 +107,19 @@ class OntoSemController(BaseController, RESTOntoSemUtils):
 
 
     def _get_faces(self):
-        "Tries to identify a face from the video stream for 3 seconds"
-        self.goal.order_id = self.RECOGNIZE_ONCE
+        """
+        Tries to identify a face from the video stream for 3 seconds
+        returns: list of strings (could be empty) corresponding to faces recognized
+        """
+        self.goal.order_id       = self.RECOGNIZE_ONCE
         self.goal.order_argument = self.DUMMY_STRING
+
         self.client.send_goal(self.goal, active_cb=self._active_cb,
                               feedback_cb=self._feedback_cb, done_cb = self._done_cb)
         self.client.wait_for_result(rospy.Duration(3.0))
 
         names = self.client.get_result()
+
         if names:
             return names.names
         else:
@@ -110,4 +127,8 @@ class OntoSemController(BaseController, RESTOntoSemUtils):
             return ['']
 
     def _listen_query_cb(self, msg):
+        """
+         TODO: get verbal commands and POST to ontosem in the form
+            {“type”: “LANGUAGE”, input: “…….“, source: “ENV.HUMAN.1”}
+        """
         pass
