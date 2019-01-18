@@ -24,9 +24,10 @@ class RESTOntoSemUtils(object):
         self.POST_bootstrap_addr       = addr + "/yale/bootstrap"
         self.POST_visual_input_addr    = addr + "/yale/visual-input"
         self.POST_action_callback_addr = addr + "/iidea/callback"
-        self.GET_action_command_addr   = addr + "/iidea/command"
+        self.POST_verbal_command_addr  = addr + "/iidea/input"
+        self.GET_robot_command_addr    = addr + "/robotcommand"
 
-        self.HEADER = {
+        self.HEADER                    = {
             'Content-Type': 'application/json',
             'Accept': 'application/json',
         }
@@ -49,8 +50,11 @@ class RESTOntoSemUtils(object):
     def POST_completed_action(self, act_dict):
         return self._POST(self.POST_action_callback_addr, act_dict)
 
-    def GET_action_command(self):
-        return self._GET(self.GET_action_command_addr)
+    def POST_verbal_command(self, command_dict):
+        return self._POST(self.POST_verbal_command_addr, command_dict)
+
+    def GET_robot_command(self):
+        return self._GET(self.GET_robot_command_addr)
 
 
 
