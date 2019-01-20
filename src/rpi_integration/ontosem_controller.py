@@ -100,15 +100,27 @@ class OntoSemController(BaseController, RESTOntoSemUtils):
 
 
     # TODO Implement
-    def _take_action(self, cmd):
+    def _take_action(self, cmd, callback_id):
         """
         Recieves actions in the form:
            {“speak”: “….“}
            {“get”: 123}
            {“hold”: “…”}
         and enacts them accordingly
+
+        After an action has been successfully executed
+        we must send a completion msg back to ontosem in
+        the form:
+
+        {
+        “callback-id”: “EXE.CALLBACK.123"
+        }`
         """
-        pass
+
+        act_dict = {callback_id: "INSERT ACTOION"}
+
+        # TODO Uncomment when running OntoSem
+        #self.POST_completed_action(act_dict)
 
     def _get_faces(self):
         """
