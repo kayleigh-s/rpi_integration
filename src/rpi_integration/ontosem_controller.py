@@ -33,7 +33,7 @@ class OntoSemController(BaseController, RESTOntoSemUtils):
         self.goal         = FaceRecognitionGoal()
 
         self.storage_1    = rospy.get_param("action_provider/objects_left").values()
-        self.storage_2    =  rospy.get_param("action_provider/objects_right").values()
+        self.storage_2    = rospy.get_param("action_provider/objects_right").values()
 
         # Listens for speech commands from microphone
         self._listen_sub  = rospy.Subscriber(self.STT_TOPIC, #self.SPEECH_SERVICE,
@@ -56,17 +56,31 @@ class OntoSemController(BaseController, RESTOntoSemUtils):
         self._bootstrap()
 
     def _perceptual_update(self):
+        """
+        POSTs the current contents of the workspace to OntoSem.
+        """
         visual_dict = {
             "storage-1": self.storage_1,
             "storage-2": self.storage_2,
             "faces":     self._get_faces()
         }
 
-        rospy.loginfo("DICT: {}".format(visual_dict))
 
+        # TODO uncomment when running OntoSem
         # self.POST_visible_objects(visual_dict)
 
+    # TODO Implement this function
     def _run(self):
+        """
+        Waits for commands from OntoSem, enacts them, and then send the appropriate
+        updates back to OntoSem.
+        """
+
+        # Get the command from the robot
+        cmd = self.GET_robot_command()
+        # Takes action based on command
+        self._take_action(cmd)
+        # Sends updates if workspace has changed
         self._perceptual_update()
 
     def _bootstrap(self):
@@ -85,26 +99,16 @@ class OntoSemController(BaseController, RESTOntoSemUtils):
         # self.POST_bootstrap_ontosem(bootstrap_dict)
 
 
-    # The face_recognition package uses actionlib (http://wiki.ros.org/actionlib) to send
-    # messages, which allows for these optional callback  to be passed
-    def _active_cb(self):
-        rospy.loginfo("GOAL IS ACTIVE")
-
-    def _feedback_cb(self, fb):
-        rospy.loginfo("GETTING FEEDBACK")
-        if fb.order_id == self.RECOGNIZE_CONT:
-            rospy.loginfo("FEEDBACK: {}, conf: {}".format(fb.names, fb.confidence))
-
-        elif fb.order_id == self.LEARN_FACE:
-            rospy.loginfo("LEARNING: {}".format(fb.names))
-
-    def _done_cb(self, state, result):
-        if result.order_id == self.RECOGNIZE_CONT or result.order_id == self.RECOGNIZE_ONCE:
-            rospy.loginfo("FEEDBACK: {}, conf: {}".format(result.names, result.confidence))
-
-        # elif result.order_id == self.LEARN_FACE:
-        #     rospy.loginfo("LEARNING: {}".format(result.names))
-
+    # TODO Implement
+    def _take_action(self, cmd):
+        """
+        Recieves actions in the form:
+           {“speak”: “….“}
+           {“get”: 123}
+           {“hold”: “…”}
+        and enacts them accordingly
+        """
+        pass
 
     def _get_faces(self):
         """
@@ -114,8 +118,28 @@ class OntoSemController(BaseController, RESTOntoSemUtils):
         self.goal.order_id       = self.RECOGNIZE_ONCE
         self.goal.order_argument = self.DUMMY_STRING
 
-        self.client.send_goal(self.goal, active_cb=self._active_cb,
-                              feedback_cb=self._feedback_cb, done_cb = self._done_cb)
+        # The face_recognition package uses actionlib (http://wiki.ros.org/actionlib) to send
+        # messages, which allows for these optional callback  to be passed
+
+        def _active_cb(self):
+            rospy.loginfo("GOAL IS ACTIVE")
+
+        def _feedback_cb(self, fb):
+            rospy.loginfo("GETTING FEEDBACK")
+            if fb.order_id == self.RECOGNIZE_CONT:
+                rospy.loginfo("FEEDBACK: {}, conf: {}".format(fb.names, fb.confidence))
+
+            elif fb.order_id == self.LEARN_FACE:
+                rospy.loginfo("LEARNING: {}".format(fb.names))
+
+        def _done_cb(self, state, result):
+            if result.order_id == self.RECOGNIZE_CONT or result.order_id == self.RECOGNIZE_ONCE:
+                rospy.loginfo("FEEDBACK: {}, conf: {}".format(result.names, result.confidence))
+
+            # elif result.order_id == self.LEARN_FACE:
+            #     rospy.loginfo("LEARNING: {}".format(result.names))
+
+        self.client.send_goal(goal, active_cb=_active_cb, feedback_cb=_feedback_cb, done_cb = _done_cb)
         self.client.wait_for_result(rospy.Duration(3.0))
 
         names = self.client.get_result()
