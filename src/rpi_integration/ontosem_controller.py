@@ -1,13 +1,45 @@
 import rospy
 import actionlib
+import time
 
 # Documentation here: http://wiki.ros.org/face_recognition
 from face_recognition.msg import FaceRecognitionGoal, FaceRecognitionAction, FRClientGoal
 
 from svox_tts.srv import Speech, SpeechRequest
 from human_robot_collaboration.controller import BaseController
-from rpi_integration.learner_utils import RESTOntoSemUtils
-from ros_speech2text.msg import transcript
+from rpi_integration.learner_utils import RESTOntoSemUtils, parse_action
+from ros_speech2text.msg import transcript # message format for ros_speech2text
+
+
+# TODO: include this somewhere else?
+OBJECT_DICT = {
+    "GET(seat)":                (   BRING, BaseController.LEFT, 198),
+    "GET(back)":                (   BRING, BaseController.LEFT, 201),
+    "GET(dowel)":              [(   BRING, BaseController.LEFT, 150),
+                                (   BRING, BaseController.LEFT, 151),
+                                (   BRING, BaseController.LEFT, 152),
+                                (   BRING, BaseController.LEFT, 153),
+                                (   BRING, BaseController.LEFT, 154),
+                                (   BRING, BaseController.LEFT, 155)],
+    "GET(dowel-top)":           (   BRING, BaseController.LEFT, 156),
+    "GET(FOOT_BRACKET)":       [(   BRING, BaseController.RIGHT, 10),
+                                (   BRING, BaseController.RIGHT, 11),
+                                (   BRING, BaseController.RIGHT, 12),
+                                (   BRING, BaseController.RIGHT, 13)],
+    "GET(bracket-front)":      [(   BRING, BaseController.RIGHT, 14),
+                                (   BRING, BaseController.RIGHT, 15),
+                                (   BRING, BaseController.RIGHT, 22),
+                                (   BRING, BaseController.RIGHT, 23)],
+    "GET(bracket-top)":        [(   BRING, BaseController.RIGHT, 16),
+                                (   BRING, BaseController.RIGHT, 17)],
+    "GET(bracket-back-right)":  (   BRING, BaseController.RIGHT, 18),
+    "GET(bracket-back-left)":   (   BRING, BaseController.RIGHT, 19),
+    "GET(screwdriver)":         (   BRING, BaseController.RIGHT, 20),
+    "HOLD(dowel)":              (HOLD_LEG, BaseController.RIGHT,  0),
+    "HOLD(seat)":               (HOLD_LEG, BaseController.RIGHT,  0),
+    "HOLD(back)":               (HOLD_LEG, BaseController.RIGHT,  0)
+
+}
 
 
 class OntoSemController(BaseController, RESTOntoSemUtils):
@@ -34,6 +66,9 @@ class OntoSemController(BaseController, RESTOntoSemUtils):
 
         self.storage_1    = rospy.get_param("action_provider/objects_left").values()
         self.storage_2    = rospy.get_param("action_provider/objects_right").values()
+
+        self.strt_time    = time.time()
+        self.LISTENING    = False
 
         # Listens for speech commands from microphone
         self._listen_sub  = rospy.Subscriber(self.STT_TOPIC, #self.SPEECH_SERVICE,
@@ -117,7 +152,37 @@ class OntoSemController(BaseController, RESTOntoSemUtils):
         }`
         """
 
-        act_dict = {callback_id: "INSERT ACTOION"}
+        spoken_flag = False
+        while(self.LISTENING):
+            if not spoken_flag:
+                rospy.loginfo("Waiting until query is done....")
+                spoken_flag = True
+
+            rospy.sleep(0.1)
+
+        self.curr_action = cmd
+
+        # FIX BASED ON FORMAT OF CMD
+        cmd, arm, obj = parse_action(cmd.name, self.OBJECT_DICT)
+
+        # TODO: keep track of arm usage to avoid using both at once
+
+        elapsed_time = time.time() - self.strt_time
+        rospy.loginfo(
+            "Taking action {} on object {} with {} arm at time {}".format(cmd,
+                                                                          obj,
+                                                                          arm_str,
+                                                                          elapsed_time))
+        # Send action to the robot
+        self._action(arm, (cmd, [obj]), {'wait': False})
+
+        elapsed_time = time.time() - self.strt_time
+
+        rospy.loginfo(
+            "Took action {} on object {} with {} arm at time {}".format(cmd,
+                                                                        obj,
+                                                                        arm_str,
+                                                                        elapsed_time))
 
         # TODO Uncomment when running OntoSem
         #self.POST_completed_action(act_dict)
@@ -167,4 +232,19 @@ class OntoSemController(BaseController, RESTOntoSemUtils):
          TODO: get verbal commands and POST to ontosem in the form
             {“type”: “LANGUAGE”, input: “…….“, source: “ENV.HUMAN.1”}
         """
-        pass
+        rospy.loginfo("QUERY RECEIVED: {}".format(msg.transcript))
+
+        with self.lock:
+            self.LISTENING = True
+
+        # What to do here?
+        cmd_dict = {}
+        cmd_dict["type"]    = "LANGUAGE"
+        cmd_dict["input"]   = msg.transcript
+        cmd_dict["source"]  = "ENV.HUMAN.1"
+
+        # TODO uncomment when running OntoSem
+        # POST_verbal_command(self, command_dict)
+
+        with self.lock:
+            self.LISTENING = False
