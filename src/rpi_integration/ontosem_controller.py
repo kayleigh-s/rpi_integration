@@ -83,8 +83,26 @@ class OntoSemController(BaseController, RESTOntoSemUtils):
         # Sends updates if workspace has changed
         self._perceptual_update()
 
+    #TODO: output needs to conform to desired format outlined below
     def _bootstrap(self):
-        "Sends OntoSem initial 'bootstrap' info about workspace"
+        """
+        Sends OntoSem initial 'bootstrap' info about workspace in the following format:
+                {
+                “locations”: [
+                    {
+                        “id”: “workspace-1”,
+                        “type”: “WORKSPACE”,
+                        “objects”: [
+                            {
+                                “id”: 1,
+                                “type”: “dowel”
+                            },
+                        “faces”: [“jake”, ...]
+                    }, ...
+                ]
+                }
+        Here workspace-1 and -2 refer to the tables to the left and right of Baxter.
+        """
         bootstrap_dict = {}
         # We assume that initially that the workspace is consistent with the launchfile
         bootstrap_dict.update(rospy.get_param("action_provider/objects_left"))
@@ -142,7 +160,8 @@ class OntoSemController(BaseController, RESTOntoSemUtils):
                 rospy.loginfo("FEEDBACK: {}, conf: {}".format(fb.names, fb.confidence))
 
             elif fb.order_id == self.LEARN_FACE:
-                rospy.loginfo("LEARNING: {}".format(fb.names))
+                
+rospy.loginfo("LEARNING: {}".format(fb.names))
 
         def _done_cb(self, state, result):
             if result.order_id == self.RECOGNIZE_CONT or result.order_id == self.RECOGNIZE_ONCE:
