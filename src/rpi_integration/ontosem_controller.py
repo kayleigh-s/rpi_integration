@@ -10,44 +10,40 @@ from human_robot_collaboration.controller import BaseController
 from rpi_integration.learner_utils import RESTOntoSemUtils, parse_action
 from ros_speech2text.msg import transcript # message format for ros_speech2text
 
-<<<<<<< Updated upstream
-
-# TODO: include this somewhere else?
-OBJECT_DICT = {
-    "GET(seat)":                (   BRING, BaseController.LEFT, 198),
-    "GET(back)":                (   BRING, BaseController.LEFT, 201),
-    "GET(dowel)":              [(   BRING, BaseController.LEFT, 150),
-                                (   BRING, BaseController.LEFT, 151),
-                                (   BRING, BaseController.LEFT, 152),
-                                (   BRING, BaseController.LEFT, 153),
-                                (   BRING, BaseController.LEFT, 154),
-                                (   BRING, BaseController.LEFT, 155)],
-    "GET(dowel-top)":           (   BRING, BaseController.LEFT, 156),
-    "GET(FOOT_BRACKET)":       [(   BRING, BaseController.RIGHT, 10),
-                                (   BRING, BaseController.RIGHT, 11),
-                                (   BRING, BaseController.RIGHT, 12),
-                                (   BRING, BaseController.RIGHT, 13)],
-    "GET(bracket-front)":      [(   BRING, BaseController.RIGHT, 14),
-                                (   BRING, BaseController.RIGHT, 15),
-                                (   BRING, BaseController.RIGHT, 22),
-                                (   BRING, BaseController.RIGHT, 23)],
-    "GET(bracket-top)":        [(   BRING, BaseController.RIGHT, 16),
-                                (   BRING, BaseController.RIGHT, 17)],
-    "GET(bracket-back-right)":  (   BRING, BaseController.RIGHT, 18),
-    "GET(bracket-back-left)":   (   BRING, BaseController.RIGHT, 19),
-    "GET(screwdriver)":         (   BRING, BaseController.RIGHT, 20),
-    "HOLD(dowel)":              (HOLD_LEG, BaseController.RIGHT,  0),
-    "HOLD(seat)":               (HOLD_LEG, BaseController.RIGHT,  0),
-    "HOLD(back)":               (HOLD_LEG, BaseController.RIGHT,  0)
-
-}
-
-
-=======
 class OntoSemController(BaseController, RESTOntoSemUtils):
     """
     Sends and receives commands from OntoSem cogntiive architecture to Baxter robot
     """
+
+    # TODO: include this somewhere else?
+    OBJECT_DICT = {
+        "GET(seat)":                (   BRING, BaseController.LEFT, 198),
+        "GET(back)":                (   BRING, BaseController.LEFT, 201),
+        "GET(dowel)":              [(   BRING, BaseController.LEFT, 150),
+                                    (   BRING, BaseController.LEFT, 151),
+                                    (   BRING, BaseController.LEFT, 152),
+                                    (   BRING, BaseController.LEFT, 153),
+                                    (   BRING, BaseController.LEFT, 154),
+                                    (   BRING, BaseController.LEFT, 155)],
+        "GET(dowel-top)":           (   BRING, BaseController.LEFT, 156),
+        "GET(FOOT_BRACKET)":       [(   BRING, BaseController.RIGHT, 10),
+                                    (   BRING, BaseController.RIGHT, 11),
+                                    (   BRING, BaseController.RIGHT, 12),
+                                    (   BRING, BaseController.RIGHT, 13)],
+        "GET(bracket-front)":      [(   BRING, BaseController.RIGHT, 14),
+                                    (   BRING, BaseController.RIGHT, 15),
+                                    (   BRING, BaseController.RIGHT, 22),
+                                    (   BRING, BaseController.RIGHT, 23)],
+        "GET(bracket-top)":        [(   BRING, BaseController.RIGHT, 16),
+                                    (   BRING, BaseController.RIGHT, 17)],
+        "GET(bracket-back-right)":  (   BRING, BaseController.RIGHT, 18),
+        "GET(bracket-back-left)":   (   BRING, BaseController.RIGHT, 19),
+        "GET(screwdriver)":         (   BRING, BaseController.RIGHT, 20),
+        "HOLD(dowel)":              (HOLD_LEG, BaseController.RIGHT,  0),
+        "HOLD(seat)":               (HOLD_LEG, BaseController.RIGHT,  0),
+        "HOLD(back)":               (HOLD_LEG, BaseController.RIGHT,  0)
+
+    }
 
     # These are used by face recognition software
     RECOGNIZE_ONCE = 0
@@ -71,6 +67,8 @@ class OntoSemController(BaseController, RESTOntoSemUtils):
 
         self.strt_time    = time.time()
         self.LISTENING    = False
+
+        self.run          = self.autostart
 
         # Listens for speech commands from microphone
         self._listen_sub  = rospy.Subscriber(self.STT_TOPIC, #self.SPEECH_SERVICE,
@@ -112,17 +110,22 @@ class OntoSemController(BaseController, RESTOntoSemUtils):
         Waits for commands from OntoSem, enacts them, and then send the appropriate
         updates back to OntoSem.
         """
+        spoken_flag = False
+        if not self.autostart:
+            while not self.run:
+                if not spoken_flag:
+                    rospy.loginfo("Waiting to start...")
+                    spoken_flag = True
 
-        # Get the command from the robot
-        cmd = self.GET_robot_command()
-        # Takes action based on command
-        self._take_action(cmd)
-        # Sends updates if workspace has changed
-        self._perceptual_update()
+        while(self.run):
+            cmd = self.GET_robot_command()
+            self._take_action(cmd)
+            self._perceptual_update()
 
     def _bootstrap(self):
         "Sends OntoSem initial 'bootstrap' info about workspace"
         bootstrap_dict = {}
+
         # We assume that initially that the workspace is consistent with the launchfile
         bootstrap_dict.update(rospy.get_param("action_provider/objects_left"))
         bootstrap_dict.update(rospy.get_param("action_provider/objects_right"))
@@ -141,13 +144,13 @@ class OntoSemController(BaseController, RESTOntoSemUtils):
 
 
     # TODO Implement
-    def _take_action(self, cmd, callback_id):
+    def _take_action(self, cmd):
         """
         Recieves actions in the form:
-           {“speak”: “….“}
-           {“get”: 123}
-           {“hold”: “…”}
+           {“speak”: “…“, "callback": "SELF.CALLBACK.1"}
         and enacts them accordingly
+
+        recognized objects: dowel, seat, back, front-bracket, foot-bracket, back-bracket, top-backet, screwdriver
 
         After an action has been successfully executed
         we must send a completion msg back to ontosem in
@@ -155,7 +158,7 @@ class OntoSemController(BaseController, RESTOntoSemUtils):
 
         {
         “callback-id”: “EXE.CALLBACK.123"
-        }`
+        }
         """
 
         spoken_flag = False
@@ -166,29 +169,14 @@ class OntoSemController(BaseController, RESTOntoSemUtils):
 
             rospy.sleep(0.1)
 
-        self.curr_action = cmd
+        self.curr_action = cmd["action"] # need to test for the best way to access this
 
         # FIX BASED ON FORMAT OF CMD
-        cmd, arm, obj = parse_action(cmd.name, self.OBJECT_DICT)
+        cmd, arm, obj = parse_action(cmd["action"], self.OBJECT_DICT)
 
-        # TODO: keep track of arm usage to avoid using both at once
-
-        elapsed_time = time.time() - self.strt_time
-        rospy.loginfo(
-            "Taking action {} on object {} with {} arm at time {}".format(cmd,
-                                                                          obj,
-                                                                          arm_str,
-                                                                          elapsed_time))
-        # Send action to the robot
         self._action(arm, (cmd, [obj]), {'wait': False})
 
-        elapsed_time = time.time() - self.strt_time
-
-        rospy.loginfo(
-            "Took action {} on object {} with {} arm at time {}".format(cmd,
-                                                                        obj,
-                                                                        arm_str,
-                                                                        elapsed_time))
+        act_dict = {"callback-id": cmd["callback"]}
 
         # TODO Uncomment when running OntoSem
         #self.POST_completed_action(act_dict)
