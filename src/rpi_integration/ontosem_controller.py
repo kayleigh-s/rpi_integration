@@ -10,6 +10,7 @@ from human_robot_collaboration.controller import BaseController
 from rpi_integration.learner_utils import RESTOntoSemUtils, parse_action
 from ros_speech2text.msg import transcript # message format for ros_speech2text
 
+<<<<<<< Updated upstream
 
 # TODO: include this somewhere else?
 OBJECT_DICT = {
@@ -42,6 +43,7 @@ OBJECT_DICT = {
 }
 
 
+=======
 class OntoSemController(BaseController, RESTOntoSemUtils):
     """
     Sends and receives commands from OntoSem cogntiive architecture to Baxter robot
@@ -127,6 +129,10 @@ class OntoSemController(BaseController, RESTOntoSemUtils):
 
         faces                   = rospy.get_param(lf.param_prefix + '/all_faces')
         bootstrap_dict['faces'] = faces
+        workspace_1 = {"id": "workspace-1", "type": "WORKSPACE", "objects": [objects_left],   "faces": faces}
+        workspace_2 = {"id": "workspace-2", "type": "WORKSPACE", "objects": [objects_right],  "faces": faces}
+
+        bootstrap_dict["locations"] = [workspace_1, workspace_2]
 
         rospy.loginfo(bootstrap_dict)
 
