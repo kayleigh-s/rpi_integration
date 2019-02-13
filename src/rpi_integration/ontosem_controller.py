@@ -15,36 +15,6 @@ class OntoSemController(BaseController, RESTOntoSemUtils):
     Sends and receives commands from OntoSem cogntiive architecture to Baxter robot
     """
 
-    # TODO: include this somewhere else?
-    OBJECT_DICT = {
-        "GET(seat)":                (   BRING, BaseController.LEFT, 198),
-        "GET(back)":                (   BRING, BaseController.LEFT, 201),
-        "GET(dowel)":              [(   BRING, BaseController.LEFT, 150),
-                                    (   BRING, BaseController.LEFT, 151),
-                                    (   BRING, BaseController.LEFT, 152),
-                                    (   BRING, BaseController.LEFT, 153),
-                                    (   BRING, BaseController.LEFT, 154),
-                                    (   BRING, BaseController.LEFT, 155)],
-        "GET(dowel-top)":           (   BRING, BaseController.LEFT, 156),
-        "GET(FOOT_BRACKET)":       [(   BRING, BaseController.RIGHT, 10),
-                                    (   BRING, BaseController.RIGHT, 11),
-                                    (   BRING, BaseController.RIGHT, 12),
-                                    (   BRING, BaseController.RIGHT, 13)],
-        "GET(bracket-front)":      [(   BRING, BaseController.RIGHT, 14),
-                                    (   BRING, BaseController.RIGHT, 15),
-                                    (   BRING, BaseController.RIGHT, 22),
-                                    (   BRING, BaseController.RIGHT, 23)],
-        "GET(bracket-top)":        [(   BRING, BaseController.RIGHT, 16),
-                                    (   BRING, BaseController.RIGHT, 17)],
-        "GET(bracket-back-right)":  (   BRING, BaseController.RIGHT, 18),
-        "GET(bracket-back-left)":   (   BRING, BaseController.RIGHT, 19),
-        "GET(screwdriver)":         (   BRING, BaseController.RIGHT, 20),
-        "HOLD(dowel)":              (HOLD_LEG, BaseController.RIGHT,  0),
-        "HOLD(seat)":               (HOLD_LEG, BaseController.RIGHT,  0),
-        "HOLD(back)":               (HOLD_LEG, BaseController.RIGHT,  0)
-
-    }
-
     # These are used by face recognition software
     RECOGNIZE_ONCE = 0
     RECOGNIZE_CONT = 1
@@ -169,17 +139,25 @@ class OntoSemController(BaseController, RESTOntoSemUtils):
 
             rospy.sleep(0.1)
 
-        self.curr_action = cmd["action"] # need to test for the best way to access this
 
-        # FIX BASED ON FORMAT OF CMD
-        cmd, arm, obj = parse_action(cmd["action"], self.OBJECT_DICT)
+        for key, value in cmd:
+            if key != "callback":
+                continue
 
-        self._action(arm, (cmd, [obj]), {'wait': False})
+            if key != "speak":
 
-        act_dict = {"callback-id": cmd["callback"]}
+                self.curr_action = key
 
-        # TODO Uncomment when running OntoSem
-        #self.POST_completed_action(act_dict)
+                if value >= 100:
+                    arm = BaseController.LEFT
+                else:
+                    arm = BaseController.RIGHT
+
+                self._action(arm, (cmd, [value]), {'wait': False})
+                post_dict = {"callback-id": cmd["callback"]}
+
+                # TODO uncomment when running OntoSem
+                # self.POST_completed_action(post_dict)
 
     def _get_faces(self):
         """
