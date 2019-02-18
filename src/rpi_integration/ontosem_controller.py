@@ -1,6 +1,5 @@
 import rospy
 import actionlib
-import time
 
 # Documentation here: http://wiki.ros.org/face_recognition
 from face_recognition.msg import FaceRecognitionGoal, FaceRecognitionAction, FRClientGoal
@@ -37,8 +36,6 @@ class OntoSemController(BaseController, RESTOntoSemUtils):
 
         self.strt_time    = time.time()
         self.LISTENING    = False
-
-        self.run          = self.autostart
 
         # Listens for speech commands from microphone
         self._listen_sub  = rospy.Subscriber(self.STT_TOPIC, #self.SPEECH_SERVICE,
@@ -82,11 +79,11 @@ class OntoSemController(BaseController, RESTOntoSemUtils):
         """
         spoken_flag = False
         if not self.autostart:
-            while not self.run:
-                if not spoken_flag:
-                    rospy.loginfo("Waiting to start...")
-                    spoken_flag = True
+            if not spoken_flag:
+                rospy.loginfo("Waiting to start...")
+                spoken_flag = True
 
+        # how to loop through this to run continuously?
         while(self.run):
             cmd = self.GET_robot_command()
             self._take_action(cmd)
@@ -132,22 +129,30 @@ class OntoSemController(BaseController, RESTOntoSemUtils):
         """
 
         spoken_flag = False
-        while(self.LISTENING):
-            if not spoken_flag:
-                rospy.loginfo("Waiting until query is done....")
-                spoken_flag = True
+        # while(self.LISTENING):
+        #     if not spoken_flag:
+        #         rospy.loginfo("Waiting until query is done....")
+        #         spoken_flag = True
 
-            rospy.sleep(0.1)
+        #     rospy.sleep(0.1)
 
 
         for key, value in cmd:
-            if key != "callback":
-                continue
 
-            if key != "speak":
+            if key == "speak":
+                # TODO speak conditional
+                # Value is sentence to speak
+                # Should this be the BaseController method or taken directly from svox_tts?
+                self.say(value)
 
+            elif key != "callback":
+                # key is action we are taking
                 self.curr_action = key
 
+                """
+                Value for action is object id:
+                Object ids below 100 are accessed with Left arm, else Right arm
+                """
                 if value >= 100:
                     arm = BaseController.LEFT
                 else:
