@@ -31,7 +31,6 @@
         <arg name="testing"            value="true" />
     </include>
 
-    <!-- TEST NODES -->
+    <!-- TEST NODE -->
     <test test-name="test_htm_controller" pkg="rpi_integration" type="test_htm_controller.py" />
-    <test test-name="test_ontosem_controller" pkg="rpi_integration" type="test_ontosem_controller.py" />
 </launch>
