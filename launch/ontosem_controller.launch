@@ -25,11 +25,18 @@
     <arg name="show_screen" default="true" />
     <!-- Determines threshold (btwn 0 and 1) for determining if a face has been recognized -->
     <arg name="conf_value" default="0.7" />
+    <!-- If to send/recieve messages to OntoSem -->
+    <arg name="use_ontosem_comms" default="true"/>
+    <!--If to use face recognition (otherise simulates its use)-->
+    <arg name="use_face_rec" default="true"/>
+
 
     <!-- ROS PARAMETERS -->
-    <param name="rpi_integration/autostart" value="$(arg autostart)"/>
-    <param name="rpi_integration/use_stt"   value="$(arg use_stt)"/>
-    <param name="rpi_integration/testing"   value="$(arg testing)"/>
+    <param name="rpi_integration/autostart"         value="$(arg autostart)"/>
+    <param name="rpi_integration/use_stt"           value="$(arg use_stt)"/>
+    <param name="rpi_integration/testing"           value="$(arg testing)"/>
+    <param name="rpi_integration/use_ontosem_comms" value="$(arg use_ontosem_comms)"/>
+    <param name="rpi_integration/use_face_rec"      value="$(arg use_face_rec)"/>
 
     <param name="~confidence_value" type="double" value="$(arg conf_value)" />
     <param name="~show_screen_flag" value="$(arg show_screen)"/>
@@ -50,7 +57,7 @@
     </include>
     
 
-    <include file="$(find rpi_integration)/launch/face_recognition_utils.launch">
+    <include file="$(find rpi_integration)/launch/face_recognition_utils.launch" if="$(arg use_face_rec)">
         <arg name="show_screen"          value="$(arg show_screen)"/>
         <arg name="conf_value"           value="$(arg conf_value)"/>
 

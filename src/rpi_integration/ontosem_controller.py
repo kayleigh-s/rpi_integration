@@ -23,27 +23,30 @@ class OntoSemController(BaseController, RESTOntoSemUtils):
 
     def __init__(self):
         # Get the parameters from launchfile
-        self.param_prefix = "/rpi_integration"
-        self.autostart    = rospy.get_param(self.param_prefix + '/autostart')
-        self.use_stt      = rospy.get_param(self.param_prefix + '/use_stt', False)
-        self.use_tts      = rospy.get_param(self.param_prefix + '/use_tts', True)
+        self.param_prefix      = "/rpi_integration"
+        self.autostart         = rospy.get_param(self.param_prefix + '/autostart')
+        self.use_stt           = rospy.get_param(self.param_prefix + '/use_stt', False)
+        self.use_tts           = rospy.get_param(self.param_prefix + '/use_tts', True)
+        self.use_ontosem_comms = rospy.get_param(self.param_prefix + '/use_ontosem_comms')
+        self.use_face_rec      = rospy.get_param(self.param_prefix + '/use_face_rec')
 
-        self.client       = actionlib.SimpleActionClient("face_recognition", FaceRecognitionAction)
-        self.goal         = FaceRecognitionGoal()
+        self.client            = actionlib.SimpleActionClient("face_recognition", FaceRecognitionAction)
+        self.goal              = FaceRecognitionGoal()
 
-        self.storage_1    = rospy.get_param("action_provider/objects_left").values()
-        self.storage_2    = rospy.get_param("action_provider/objects_right").values()
+        self.storage_1         = rospy.get_param("action_provider/objects_left").values()
+        self.storage_2         = rospy.get_param("action_provider/objects_right").values()
 
-        self.strt_time    = time.time()
-        self.LISTENING    = False
+        # Candidate for deletion
+        # self.strt_time         = time.time()
+        self.LISTENING         = False
 
         # Listens for speech commands from microphone
-        self._listen_sub  = rospy.Subscriber(self.STT_TOPIC, #self.SPEECH_SERVICE,
+        self._listen_sub       = rospy.Subscriber(self.STT_TOPIC, #self.SPEECH_SERVICE,
                                                    transcript, self._listen_query_cb)
         BaseController.__init__(
             self,
-            use_left=True,
-            use_right=True,
+            use_left=False,
+            use_right=False,
             use_stt=False,
             use_tts=self.use_tts,
             recovery=False,
@@ -51,9 +54,10 @@ class OntoSemController(BaseController, RESTOntoSemUtils):
 
         RESTOntoSemUtils.__init__(self)
 
-        rospy.logwarn("Waiting for actionserver....")
-        self.client.wait_for_server()
-        rospy.logwarn("Action server ready!")
+        if self.use_face_rec:
+            rospy.logwarn("Waiting for actionserver....")
+            self.client.wait_for_server()
+            rospy.logwarn("Action server ready!")
 
         self._bootstrap()
 
@@ -67,9 +71,8 @@ class OntoSemController(BaseController, RESTOntoSemUtils):
             "faces":     self._get_faces()
         }
 
-
-        # TODO uncomment when running OntoSem
-        # self.POST_visible_objects(visual_dict)
+        if self.use_ontosem_comms:
+            self.POST_visible_objects(visual_dict)
 
     # TODO Implement this function
     def _run(self):
@@ -89,16 +92,35 @@ class OntoSemController(BaseController, RESTOntoSemUtils):
             self._take_action(cmd)
             self._perceptual_update()
 
+    #TODO: output needs to conform to desired format outlined below
     def _bootstrap(self):
-        "Sends OntoSem initial 'bootstrap' info about workspace"
+        """
+        Sends OntoSem initial 'bootstrap' info about workspace in the following format:
+                {
+                "locations": [
+                    {
+                        "id": "workspace-1",
+                        "type": "WORKSPACE",
+                        "objects": [
+                            {
+                                "id": 1,
+                                "type": "dowel"
+                            },
+                        "faces": ["jake", ...]
+                    }, ...
+                ]
+                }
+        Here workspace-1 and -2 refer to the tables to the left and right of Baxter.
+        """
         bootstrap_dict = {}
 
         # We assume that initially that the workspace is consistent with the launchfile
         bootstrap_dict.update(rospy.get_param("action_provider/objects_left"))
         bootstrap_dict.update(rospy.get_param("action_provider/objects_right"))
 
-        faces                   = rospy.get_param(lf.param_prefix + '/all_faces')
+        faces                   = rospy.get_param(self.param_prefix + '/all_faces')
         bootstrap_dict['faces'] = faces
+
         workspace_1 = {"id": "workspace-1", "type": "WORKSPACE", "objects": [objects_left],   "faces": faces}
         workspace_2 = {"id": "workspace-2", "type": "WORKSPACE", "objects": [objects_right],  "faces": faces}
 
@@ -106,16 +128,17 @@ class OntoSemController(BaseController, RESTOntoSemUtils):
 
         rospy.loginfo(bootstrap_dict)
 
-        # NOTE: Uncomment when running OntoSem
-        # self.POST_bootstrap_ontosem(bootstrap_dict)
+        if self.use_ontosem_comms:
+            self.POST_bootstrap_ontosem(bootstrap_dict)
 
 
     # TODO Implement
     def _take_action(self, cmd):
         """
-        Recieves actions in the form:
-           {“speak”: “…“, "callback": "SELF.CALLBACK.1"}
-        and enacts them accordingly
+        Receives actions in the form:
+            {"speak": "...", "callback": "SELF.CALLBACK.1"}
+
+        and enacts them accordingly.
 
         recognized objects: dowel, seat, back, front-bracket, foot-bracket, back-bracket, top-backet, screwdriver
 
@@ -124,7 +147,7 @@ class OntoSemController(BaseController, RESTOntoSemUtils):
         the form:
 
         {
-        “callback-id”: “EXE.CALLBACK.123"
+        "callback-id": "EXE.CALLBACK.123"
         }
         """
 
@@ -161,53 +184,56 @@ class OntoSemController(BaseController, RESTOntoSemUtils):
                 self._action(arm, (cmd, [value]), {'wait': False})
                 post_dict = {"callback-id": cmd["callback"]}
 
-                # TODO uncomment when running OntoSem
-                # self.POST_completed_action(post_dict)
+                if self.use_ontosem_comms:
+                    self.POST_completed_action(post_dict)
 
     def _get_faces(self):
         """
         Tries to identify a face from the video stream for 3 seconds
         returns: list of strings (could be empty) corresponding to faces recognized
         """
-        self.goal.order_id       = self.RECOGNIZE_ONCE
-        self.goal.order_argument = self.DUMMY_STRING
+        if self.use_face_rec:
+            self.goal.order_id       = self.RECOGNIZE_ONCE
+            self.goal.order_argument = self.DUMMY_STRING
 
-        # The face_recognition package uses actionlib (http://wiki.ros.org/actionlib) to send
-        # messages, which allows for these optional callback  to be passed
+            # The face_recognition package uses actionlib (http://wiki.ros.org/actionlib) to send
+            # messages, which allows for these optional callback  to be passed
 
-        def _active_cb(self):
-            rospy.loginfo("GOAL IS ACTIVE")
+            def _active_cb(self):
+                rospy.loginfo("GOAL IS ACTIVE")
 
-        def _feedback_cb(self, fb):
-            rospy.loginfo("GETTING FEEDBACK")
-            if fb.order_id == self.RECOGNIZE_CONT:
-                rospy.loginfo("FEEDBACK: {}, conf: {}".format(fb.names, fb.confidence))
+            def _feedback_cb(self, fb):
+                rospy.loginfo("GETTING FEEDBACK")
+                if fb.order_id == self.RECOGNIZE_CONT:
+                    rospy.loginfo("FEEDBACK: {}, conf: {}".format(fb.names, fb.confidence))
 
-            elif fb.order_id == self.LEARN_FACE:
-                rospy.loginfo("LEARNING: {}".format(fb.names))
+                elif fb.order_id == self.LEARN_FACE:
+                    rospy.loginfo("LEARNING: {}".format(fb.names))
 
-        def _done_cb(self, state, result):
-            if result.order_id == self.RECOGNIZE_CONT or result.order_id == self.RECOGNIZE_ONCE:
-                rospy.loginfo("FEEDBACK: {}, conf: {}".format(result.names, result.confidence))
+            def _done_cb(self, state, result):
+                if result.order_id == self.RECOGNIZE_CONT or result.order_id == self.RECOGNIZE_ONCE:
+                    rospy.loginfo("FEEDBACK: {}, conf: {}".format(result.names, result.confidence))
 
-            # elif result.order_id == self.LEARN_FACE:
-            #     rospy.loginfo("LEARNING: {}".format(result.names))
+                # elif result.order_id == self.LEARN_FACE:
+                #     rospy.loginfo("LEARNING: {}".format(result.names))
 
-        self.client.send_goal(goal, active_cb=_active_cb, feedback_cb=_feedback_cb, done_cb = _done_cb)
-        self.client.wait_for_result(rospy.Duration(3.0))
+            self.client.send_goal(goal, active_cb=_active_cb, feedback_cb=_feedback_cb, done_cb = _done_cb)
+            self.client.wait_for_result(rospy.Duration(3.0))
 
-        names = self.client.get_result()
+            names = self.client.get_result()
 
-        if names:
-            return names.names
+            if names:
+                return names.names
+            else:
+                rospy.loginfo("No faces were found!")
+                return ['']
         else:
-            rospy.loginfo("No faces were found!")
-            return ['']
+            return rospy.get_param(self.param_prefix + '/all_faces')
 
     def _listen_query_cb(self, msg):
         """
          TODO: get verbal commands and POST to ontosem in the form
-            {“type”: “LANGUAGE”, input: “…….“, source: “ENV.HUMAN.1”}
+            {"type": "LANGUAGE", input: "...", source: "ENV.HUMAN.1"}
         """
         rospy.loginfo("QUERY RECEIVED: {}".format(msg.transcript))
 
@@ -220,8 +246,8 @@ class OntoSemController(BaseController, RESTOntoSemUtils):
         cmd_dict["input"]   = msg.transcript
         cmd_dict["source"]  = "ENV.HUMAN.1"
 
-        # TODO uncomment when running OntoSem
-        # POST_verbal_command(self, command_dict)
+        if self.use_ontosem_comms:
+            POST_verbal_command(self, command_dict)
 
         with self.lock:
             self.LISTENING = False

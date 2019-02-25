@@ -58,9 +58,6 @@ class RESTOntoSemUtils(object):
 
 
 
-
-
-
 class RESTLearnerUtils(object):
     def __init__(self):
         """REST API for interfacing with learner"""
