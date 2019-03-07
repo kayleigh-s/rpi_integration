@@ -7,7 +7,8 @@ from face_recognition.msg import FaceRecognitionGoal, FaceRecognitionAction, FRC
 from svox_tts.srv import Speech, SpeechRequest
 from human_robot_collaboration.controller import BaseController
 from rpi_integration.learner_utils import RESTOntoSemUtils, parse_action
-from ros_speech2text.msg import transcript # message format for ros_speech2text
+# TODO Uncomment
+# from ros_speech2text.msg import transcript # message format for ros_speech2text
 
 class OntoSemController(BaseController, RESTOntoSemUtils):
     """
@@ -41,8 +42,8 @@ class OntoSemController(BaseController, RESTOntoSemUtils):
         self.LISTENING         = False
 
         # Listens for speech commands from microphone
-        self._listen_sub       = rospy.Subscriber(self.STT_TOPIC, #self.SPEECH_SERVICE,
-                                                   transcript, self._listen_query_cb)
+        # self._listen_sub       = rospy.Subscriber(self.STT_TOPIC, #self.SPEECH_SERVICE,
+        #                                            transcript, self._listen_query_cb)
         BaseController.__init__(
             self,
             use_left=False,
@@ -152,13 +153,6 @@ class OntoSemController(BaseController, RESTOntoSemUtils):
         """
 
         spoken_flag = False
-        # while(self.LISTENING):
-        #     if not spoken_flag:
-        #         rospy.loginfo("Waiting until query is done....")
-        #         spoken_flag = True
-
-        #     rospy.sleep(0.1)
-
 
         for key, value in cmd:
 
@@ -235,7 +229,7 @@ class OntoSemController(BaseController, RESTOntoSemUtils):
          TODO: get verbal commands and POST to ontosem in the form
             {"type": "LANGUAGE", input: "...", source: "ENV.HUMAN.1"}
         """
-        rospy.loginfo("QUERY RECEIVED: {}".format(msg.transcript))
+        # rospy.loginfo("QUERY RECEIVED: {}".format(msg.transcript))
 
         with self.lock:
             self.LISTENING = True
@@ -243,7 +237,12 @@ class OntoSemController(BaseController, RESTOntoSemUtils):
         # What to do here?
         cmd_dict = {}
         cmd_dict["type"]    = "LANGUAGE"
-        cmd_dict["input"]   = msg.transcript
+
+
+        # FOR TESTING
+        cmd_dict["input"]   = "transcript"
+        # TODO uncomment
+        # cmd_dict["input"]   = msg.transcript
         cmd_dict["source"]  = "ENV.HUMAN.1"
 
         if self.use_ontosem_comms:
