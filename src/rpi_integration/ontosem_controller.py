@@ -36,6 +36,7 @@ class OntoSemController(BaseController, RESTOntoSemUtils):
         self.storage_1         = rospy.get_param("action_provider/objects_left").values()
         self.storage_2         = rospy.get_param("action_provider/objects_right").values()
 
+        self.workspace         = [] # stores ids of retrieved objects in shared workspace.
         # Candidate for deletion
         # self.strt_time         = time.time()
         self.LISTENING         = False
@@ -66,8 +67,8 @@ class OntoSemController(BaseController, RESTOntoSemUtils):
         POSTs the current contents of the workspace to OntoSem.
         """
         visual_dict = {
-            "storage-1": self.storage_1,
-            "storage-2": self.storage_2,
+            "storage-1": [o for o in self.storage_1 if not o in self.workspace], # objects in workspace are
+            "storage-2": [o for o in self.storage_2 if not o in self.workspace], # no longer in storage
             "faces":     self._get_faces()
         }
 
@@ -151,41 +152,43 @@ class OntoSemController(BaseController, RESTOntoSemUtils):
         }
         """
 
-        spoken_flag = False
-        # while(self.LISTENING):
-        #     if not spoken_flag:
-        #         rospy.loginfo("Waiting until query is done....")
-        #         spoken_flag = True
-
-        #     rospy.sleep(0.1)
+        ARM_ID_VAL  = 100 # Value for action is object id:
+                          # Object ids below 100 are accessed with Left arm, else Right arm
 
 
         for key, value in cmd:
 
             if key == "speak":
-                # TODO speak conditional
                 # Value is sentence to speak
                 # Should this be the BaseController method or taken directly from svox_tts?
                 self.say(value)
 
-            elif key != "callback":
+            elif key == "get":
                 # key is action we are taking
                 self.curr_action = key
 
-                """
-                Value for action is object id:
-                Object ids below 100 are accessed with Left arm, else Right arm
-                """
-                if value >= 100:
-                    arm = BaseController.LEFT
+                if value >= ARM_ID_VAL:
+                    arm     = self.action_left # A method for passing cmd to left arm
                 else:
-                    arm = BaseController.RIGHT
+                    arm     = self.action_right # A method for passing cmd to left arm
 
-                self._action(arm, (cmd, [value]), {'wait': False})
-                post_dict = {"callback-id": cmd["callback"]}
+                r = arm((cmd, [value]), {'wait': False})
 
-                if self.use_ontosem_comms:
-                    self.POST_completed_action(post_dict)
+                if r.success:
+                    rospy.loginfo("Successfully retrieved obj {}".format(value))
+
+                    with self.lock:
+                        self.workspace.append(value) # object has been successfully brought to workspace
+
+            elif key == "hold":
+                # This may cause a problem later because there are two different types of holds
+                # but it should be ok for now.
+                 r = self.action_right("hold_leg", 0)
+
+        post_dict = {"callback-id": cmd["callback"]} # To be sent back to ontosem
+
+        if self.use_ontosem_comms:
+            self.POST_completed_action(post_dict)
 
     def _get_faces(self):
         """
