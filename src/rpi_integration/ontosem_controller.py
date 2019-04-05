@@ -116,16 +116,22 @@ class OntoSemController(BaseController, RESTOntoSemUtils):
         bootstrap_dict = {}
 
         # We assume that initially that the workspace is consistent with the launchfile
-        bootstrap_dict.update(rospy.get_param("action_provider/objects_left"))
-        bootstrap_dict.update(rospy.get_param("action_provider/objects_right"))
+
+        objects_left    = rospy.get_param("action_provider/objects_left")
+        objects_right   = rospy.get_param("action_provider/objects_right")
+
+        # Q: redundant?
+        bootstrap_dict.update(objects_left)
+        bootstrap_dict.update(objects_right)
 
         faces                   = rospy.get_param(self.param_prefix + '/all_faces')
         bootstrap_dict['faces'] = faces
 
-        workspace_1 = {"id": "workspace-1", "type": "WORKSPACE", "objects": [objects_left],   "faces": faces}
-        workspace_2 = {"id": "workspace-2", "type": "WORKSPACE", "objects": [objects_right],  "faces": faces}
+        workspace_0 = {"id": "workspace-0", "type": "WORKSPACE", "objects": [],               "faces": faces }
+        workspace_1 = {"id": "workspace-1", "type": "WORKSPACE", "objects": [objects_left],   "faces": []}
+        workspace_2 = {"id": "workspace-2", "type": "WORKSPACE", "objects": [objects_right],  "faces": []}
 
-        bootstrap_dict["locations"] = [workspace_1, workspace_2]
+        bootstrap_dict["locations"] = [workspace_0, workspace_1, workspace_2]
 
         rospy.loginfo(bootstrap_dict)
 
