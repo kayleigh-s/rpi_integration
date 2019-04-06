@@ -98,34 +98,64 @@ class OntoSemController(BaseController, RESTOntoSemUtils):
         """
         Sends OntoSem initial 'bootstrap' info about workspace in the following format:
                 {
-                "locations": [
+                  "locations": [
                     {
-                        "id": "workspace-1",
-                        "type": "WORKSPACE",
-                        "objects": [
-                            {
-                                "id": 1,
-                                "type": "dowel"
-                            },
-                        "faces": ["jake", ...]
-                    }, ...
-                ]
+                      "id": "workspace-1",
+                      "type": "WORKSPACE",
+                      "objects": [],
+                      "faces": ["jake"]
+                    }, {
+                      "id": "storage-1",
+                      "type": "STORAGE",
+                      "objects": [
+                        {
+                          "id": 1,
+                          "type": "screwdriver"
+                        }, {
+                          "id": 2,
+                          "type": "front-bracket"
+                        }, {
+                          "id": 3,
+                          "type": "foot-bracket"
+                        }
+                      ],
+                      "faces": []
+                    }, {
+                      "id": "storage-2",
+                      "type": "STORAGE",
+                      "objects": [],
+                      "faces": []
+                    }
+                  ]
                 }
-        Here workspace-1 and -2 refer to the tables to the left and right of Baxter.
+        Here storage-1 and -2 refer to the tables to the left and right of Baxter.
         """
         bootstrap_dict = {}
 
         # We assume that initially that the workspace is consistent with the launchfile
-        bootstrap_dict.update(rospy.get_param("action_provider/objects_left"))
-        bootstrap_dict.update(rospy.get_param("action_provider/objects_right"))
+
+        objects_left    = rospy.get_param("action_provider/objects_left")
+        objects_right   = rospy.get_param("action_provider/objects_right")
 
         faces                   = rospy.get_param(self.param_prefix + '/all_faces')
-        bootstrap_dict['faces'] = faces
 
-        workspace_1 = {"id": "workspace-1", "type": "WORKSPACE", "objects": [objects_left],   "faces": faces}
-        workspace_2 = {"id": "workspace-2", "type": "WORKSPACE", "objects": [objects_right],  "faces": faces}
+        workspace_1 = {"id": "workspace-1",
+                        "type": "WORKSPACE", 
+                        "objects": [], 
+                        "faces": faces}
 
-        bootstrap_dict["locations"] = [workspace_1, workspace_2]
+        storage_1   = {"id": "storage-1",
+                        "type": "STORAGE",
+                        "objects": [objects_left],
+                        "faces": []}
+
+        storage_2   = {"id": "storage-2",
+                        "type": "STORAGE",
+                        "objects": [objects_right],
+                        "faces": []
+                        }
+
+        bootstrap_dict["locations"] = [workspace_1, storage_1, storage_2]
 
         rospy.loginfo(bootstrap_dict)
 
