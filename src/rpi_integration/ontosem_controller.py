@@ -1,12 +1,14 @@
+#!/usr/bin/env python
+
 import rospy
 import actionlib
-
 # Documentation here: http://wiki.ros.org/face_recognition
 from face_recognition.msg import FaceRecognitionGoal, FaceRecognitionAction, FRClientGoal
 
 from svox_tts.srv import Speech, SpeechRequest
 from human_robot_collaboration.controller import BaseController
 from rpi_integration.learner_utils import RESTOntoSemUtils, parse_action
+from rpi_integration_msgs.srv import RobotCommand
 from ros_speech2text.msg import transcript # message format for ros_speech2text
 
 class OntoSemController(BaseController, RESTOntoSemUtils):
@@ -20,6 +22,7 @@ class OntoSemController(BaseController, RESTOntoSemUtils):
     LEARN_FACE     = 2
     TRAIN_FACE     = 3
     DUMMY_STRING   = 'none'
+
 
     def __init__(self):
         # Get the parameters from launchfile
@@ -38,34 +41,47 @@ class OntoSemController(BaseController, RESTOntoSemUtils):
 
         self.workspace         = [] # stores ids of retrieved objects in shared workspace.
         # Candidate for deletion
-        # self.strt_time         = time.time()
+        # self.strt_time       = time.time()
         self.LISTENING         = False
 
         # Listens for speech commands from microphone
         self._listen_sub       = rospy.Subscriber(self.STT_TOPIC, #self.SPEECH_SERVICE,
                                                    transcript, self._listen_query_cb)
+        self._cmd               = None # Will store the current command POSTed by OntoSem
         BaseController.__init__(
             self,
-            use_left=False,
-            use_right=False,
-            use_stt=False,
+            use_left=True,
+            use_right=True,
+            use_stt=self.use_stt,
             use_tts=self.use_tts,
             recovery=False,
         )
 
         RESTOntoSemUtils.__init__(self)
 
+
         if self.use_face_rec:
             rospy.logwarn("Waiting for actionserver....")
             self.client.wait_for_server()
             rospy.logwarn("Action server ready!")
 
+
         self._bootstrap()
+
+    @property
+    def cmd(self):
+        return self._cmd
+
+    @cmd.setter
+    def cmd(self, cmd):
+        with self.lock:
+            self._cmd = cmd
 
     def _perceptual_update(self):
         """
         POSTs the current contents of the workspace to OntoSem.
         """
+        rospy.loginfo("Sending perceptual update...")
         visual_dict = {
             "storage-1": [o for o in self.storage_1 if not o in self.workspace], # objects in workspace are
             "storage-2": [o for o in self.storage_2 if not o in self.workspace], # no longer in storage
@@ -75,23 +91,23 @@ class OntoSemController(BaseController, RESTOntoSemUtils):
         if self.use_ontosem_comms:
             self.POST_visible_objects(visual_dict)
 
-    # TODO Implement this function
+
     def _run(self):
         """
         Waits for commands from OntoSem, enacts them, and then send the appropriate
         updates back to OntoSem.
         """
-        spoken_flag = False
-        if not self.autostart:
-            if not spoken_flag:
-                rospy.loginfo("Waiting to start...")
-                spoken_flag = True
+        # spoken_flag = False
+        # if not self.autostart:
+        #     if not spoken_flag:
+        #         rospy.loginfo("Waiting to start...")
+        #         spoken_flag = True
 
-        # how to loop through this to run continuously?
-        while(self.run):
-            cmd = self.GET_robot_command()
-            self._take_action(cmd)
-            self._perceptual_update()
+        s = rospy.Service('http_to_srv',RobotCommand, self._take_action)
+        self.POST_verbal_command({"input": "Let's build a chair.", "source": "@ENV.HUMAN.1"})
+        # rospy.sleep(3.0)
+        # if self._take_action(self._cmd):
+        #     self._percetual_update()
 
     #TODO: output needs to conform to desired format outlined below
     def _bootstrap(self):
@@ -130,6 +146,11 @@ class OntoSemController(BaseController, RESTOntoSemUtils):
                 }
         Here storage-1 and -2 refer to the tables to the left and right of Baxter.
         """
+
+        self.GET_bootstrap() # Initializes agent knowledge
+        self.POST_start()    # Starts agent
+        rospy.loginfo("Sending bootstrap info...")
+
         bootstrap_dict = {}
 
         # We assume that initially that the workspace is consistent with the launchfile
@@ -164,7 +185,7 @@ class OntoSemController(BaseController, RESTOntoSemUtils):
 
 
     # TODO Implement
-    def _take_action(self, cmd):
+    def _take_action(self, req):
         """
         Receives actions in the form:
             {"speak": "...", "callback": "SELF.CALLBACK.1"}
@@ -185,6 +206,11 @@ class OntoSemController(BaseController, RESTOntoSemUtils):
         ARM_ID_VAL  = 100 # Value for action is object id:
                           # Object ids below 100 are accessed with Left arm, else Right arm
 
+
+
+        rospy.loginfo("Received command...")
+        cmd = {req.cmd: req.id, "callback": req.callback}
+        rospy.loginfo("CMD: {}".format(cmd))
 
         for key, value in cmd:
 
@@ -219,6 +245,12 @@ class OntoSemController(BaseController, RESTOntoSemUtils):
 
         if self.use_ontosem_comms:
             self.POST_completed_action(post_dict)
+
+        # with self.lock:
+        #     self._cmd = None
+
+        self._perceptual_update()
+        return RobotCommandResponse("Ok")
 
     def _get_faces(self):
         """
@@ -279,8 +311,9 @@ class OntoSemController(BaseController, RESTOntoSemUtils):
         cmd_dict["input"]   = msg.transcript
         cmd_dict["source"]  = "ENV.HUMAN.1"
 
+
         if self.use_ontosem_comms:
-            POST_verbal_command(self, command_dict)
+            self.POST_verbal_command(self, cmd_dict)
 
         with self.lock:
             self.LISTENING = False
