@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 import requests
+import rospy
 
 def parse_action(act, obj_dict):
     """ Parses actions in rpi notation (e.g. GET(dowel)) and converts them
@@ -21,10 +22,14 @@ class RESTOntoSemUtils(object):
     def __init__(self):
 
         addr = "http://0.0.0.0:5002"
+        self.GET_start_addr           = addr + "/iidea/start"
         self.POST_bootstrap_addr       = addr + "/yale/bootstrap"
         self.POST_visual_input_addr    = addr + "/yale/visual-input"
         self.POST_action_callback_addr = addr + "/iidea/callback"
         self.POST_verbal_command_addr  = addr + "/iidea/input"
+
+        self.GET_chair_addr            = addr + "/bootstrap?package=backend.resources.experiments&resource=chair.knowledge"
+        self.GET_robot_addr            = addr + "/bootstrap?package=backend.resources.experiments&resource=Robot_1.knowledge"
         self.GET_robot_command_addr    = addr + "/robotcommand"
 
         self.HEADER                    = {
@@ -41,8 +46,14 @@ class RESTOntoSemUtils(object):
         req = requests.get(url=addr)
         return req
 
+    def GET_start(self):
+        r = self._GET(self.GET_start_addr)
+        rospy.loginfo("GETTING START REQUEST {}".format(r.text))
+
     def POST_bootstrap_ontosem(self, id_dict):
-        return self._POST(self.POST_bootstrap_addr, id_dict)
+        r = self._POST(self.POST_bootstrap_addr, id_dict)
+        rospy.loginfo(r.text)
+        return r 
 
     def POST_visible_objects(self, obj_dict):
         return self._POST(self.POST_visual_input_addr, obj_dict)
@@ -53,8 +64,11 @@ class RESTOntoSemUtils(object):
     def POST_verbal_command(self, command_dict):
         return self._POST(self.POST_verbal_command_addr, command_dict)
 
-    def GET_robot_command(self):
-        return self._GET(self.GET_robot_command_addr)
+
+    def GET_bootstrap(self):
+        r1 = self._GET(self.GET_chair_addr)
+        r2 = self._GET(self.GET_robot_addr)
+        return r1, r2
 
 
 
@@ -94,3 +108,16 @@ class RESTLearnerUtils(object):
         req = requests.post(url=self.query_addr, data=data, headers=self.HEADER)
         return req
 
+if __name__ == '__main__':
+
+    r1 = requests.post(url="http://localhost:5003/ontology/manage/remote/download",
+                  data={"ontology":"robot-v.1.0.0"})
+
+    requests.post(url="http://localhost:5003/ontology/manage/local/install",
+                  data={"ontology":"robot-v.1.0.0"})
+
+    requests.post (url="http://localhost:5003/ontology/manage/activate",
+                   data={"ontology":"robot-v.1.0.0"})
+
+
+    print(r1.text)
