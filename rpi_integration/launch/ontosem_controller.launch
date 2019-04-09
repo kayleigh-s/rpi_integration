@@ -64,6 +64,7 @@
 
       </include>
 
+    <node pkg="rpi_integration" type="http_to_srv.py" name="http_to_srv" output="screen"/>
     <node pkg="rpi_integration" type="ontosem_controller.py" name="ontosem_controller" output="screen"/>
 
 

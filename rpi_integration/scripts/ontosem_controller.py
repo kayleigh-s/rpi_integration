@@ -3,7 +3,9 @@
 import rospy
 from rpi_integration.ontosem_controller import OntoSemController
 
-rospy.loginfo("Running OntoSemController")
-controller = OntoSemController()
-controller.run()
-rospy.spin()
+
+if __name__ == '__main__':
+
+    controller = OntoSemController()
+    controller.run()
+    rospy.spin()

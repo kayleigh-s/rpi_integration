@@ -23,4 +23,6 @@ def getCommand():
     return "OK"
 
 if __name__ == '__main__':
-    rospy.init_node(name)
+    rospy.init_node(name=name)
+    rospy.loginfo("Starting {} node".format(name))
+    app.run(host='0.0.0.0', port=5004)
