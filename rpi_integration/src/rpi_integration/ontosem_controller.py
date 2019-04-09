@@ -2,6 +2,7 @@
 
 import rospy
 import actionlib
+import json
 # Documentation here: http://wiki.ros.org/face_recognition
 from face_recognition.msg import FaceRecognitionGoal, FaceRecognitionAction, FRClientGoal
 
@@ -89,7 +90,7 @@ class OntoSemController(BaseController, RESTOntoSemUtils):
         }
 
         if self.use_ontosem_comms:
-            self.POST_visible_objects(visual_dict)
+            self.POST_visible_objects(json.dumps(visual_dict))
 
 
     def _run(self):
@@ -103,9 +104,10 @@ class OntoSemController(BaseController, RESTOntoSemUtils):
         #         rospy.loginfo("Waiting to start...")
         #         spoken_flag = True
 
-        s = rospy.Service('http_to_srv',RobotCommand, self._take_action)
+        self.service = rospy.Service('http_to_srv',RobotCommand, self._take_action)
+        rospy.sleep(6.0)
         self.POST_verbal_command({"input": "Let's build a chair.", "source": "@ENV.HUMAN.1"})
-        # rospy.sleep(3.0)
+        rospy.loginfo("Sent command!")
         # if self._take_action(self._cmd):
         #     self._percetual_update()
 
@@ -148,15 +150,15 @@ class OntoSemController(BaseController, RESTOntoSemUtils):
         """
 
         self.GET_bootstrap() # Initializes agent knowledge
-        self.POST_start()    # Starts agent
+        self.GET_start()    # Starts agent
         rospy.loginfo("Sending bootstrap info...")
 
         bootstrap_dict = {}
 
         # We assume that initially that the workspace is consistent with the launchfile
 
-        objects_left    = rospy.get_param("action_provider/objects_left")
-        objects_right   = rospy.get_param("action_provider/objects_right")
+        objs_left   = rospy.get_param("action_provider/objects_left")
+        objs_right  = rospy.get_param("action_provider/objects_right")
 
         faces                   = rospy.get_param(self.param_prefix + '/all_faces')
 
@@ -167,12 +169,12 @@ class OntoSemController(BaseController, RESTOntoSemUtils):
 
         storage_1   = {"id": "storage-1",
                         "type": "STORAGE",
-                        "objects": [objects_left],
+                        "objects": [{"id":v, "type":k} for k, v in objs_left.items()],
                         "faces": []}
 
         storage_2   = {"id": "storage-2",
                         "type": "STORAGE",
-                        "objects": [objects_right],
+                        "objects": [{"id":v, "type":k} for k, v in objs_right.items()],
                         "faces": []
                         }
 
@@ -181,7 +183,7 @@ class OntoSemController(BaseController, RESTOntoSemUtils):
         rospy.loginfo(bootstrap_dict)
 
         if self.use_ontosem_comms:
-            self.POST_bootstrap_ontosem(bootstrap_dict)
+            self.POST_bootstrap_ontosem(json.dumps(bootstrap_dict))
 
 
     # TODO Implement
@@ -244,7 +246,7 @@ class OntoSemController(BaseController, RESTOntoSemUtils):
         post_dict = {"callback-id": cmd["callback"]} # To be sent back to ontosem
 
         if self.use_ontosem_comms:
-            self.POST_completed_action(post_dict)
+            self.POST_completed_action(json.dumps(post_dict))
 
         # with self.lock:
         #     self._cmd = None
@@ -313,7 +315,7 @@ class OntoSemController(BaseController, RESTOntoSemUtils):
 
 
         if self.use_ontosem_comms:
-            self.POST_verbal_command(self, cmd_dict)
+            self.POST_verbal_command(self, json.dumps(cmd_dict))
 
         with self.lock:
             self.LISTENING = False
