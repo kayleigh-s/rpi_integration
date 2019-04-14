@@ -37,8 +37,8 @@ class OntoSemController(BaseController, RESTOntoSemUtils):
         self.client            = actionlib.SimpleActionClient("face_recognition", FaceRecognitionAction)
         self.goal              = FaceRecognitionGoal()
 
-        self.storage_1         = rospy.get_param("action_provider/objects_left").values()
-        self.storage_2         = rospy.get_param("action_provider/objects_right").values()
+        self.storage_1         = [] # For the purposes of this demo, storage_1 is empty
+        self.storage_2         = rospy.get_param(self.param_prefix + "/objects_right").values()
 
         self.workspace         = [] # stores ids of retrieved objects in shared workspace.
         # Candidate for deletion
@@ -105,8 +105,8 @@ class OntoSemController(BaseController, RESTOntoSemUtils):
         #         spoken_flag = True
 
         self.service = rospy.Service('http_to_srv',RobotCommand, self._take_action)
-        rospy.sleep(6.0)
-        self.POST_verbal_command({"input": "Let's build a chair.", "source": "@ENV.HUMAN.1"})
+        rospy.sleep(8.0)
+        self.POST_verbal_command(json.dumps({"input": "Let's build a chair.", "source": "@ENV.HUMAN.1"}))
         rospy.loginfo("Sent command!")
         # if self._take_action(self._cmd):
         #     self._percetual_update()
@@ -157,8 +157,8 @@ class OntoSemController(BaseController, RESTOntoSemUtils):
 
         # We assume that initially that the workspace is consistent with the launchfile
 
-        objs_left   = rospy.get_param("action_provider/objects_left")
-        objs_right  = rospy.get_param("action_provider/objects_right")
+        objs_left   = []
+        objs_right  = rospy.get_param(self.param_prefix + "/objects_right")
 
         faces                   = rospy.get_param(self.param_prefix + '/all_faces')
 
@@ -169,7 +169,7 @@ class OntoSemController(BaseController, RESTOntoSemUtils):
 
         storage_1   = {"id": "storage-1",
                         "type": "STORAGE",
-                        "objects": [{"id":v, "type":k} for k, v in objs_left.items()],
+                        "objects": objs_left,
                         "faces": []}
 
         storage_2   = {"id": "storage-2",

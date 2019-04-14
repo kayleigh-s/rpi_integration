@@ -28,7 +28,7 @@
     <!-- If to send/recieve messages to OntoSem -->
     <arg name="use_ontosem_comms" default="true"/>
     <!--If to use face recognition (otherise simulates its use)-->
-    <arg name="use_face_rec" default="true"/>
+    <arg name="use_face_rec" default="false"/>
 
 
     <!-- ROS PARAMETERS -->
@@ -43,7 +43,15 @@
     <param name="~show_screen_flag" value="$(arg show_screen)"/>
 
     <rosparam param="rpi_integration/all_faces">
-      "[Jake]"
+      ["jake"]
+    </rosparam>
+
+
+    <!-- Objects database for the right arm -->
+    <rosparam param = "rpi_integration/objects_right">
+        "foot-bracket"  : 10
+        "front-bracket" : 14
+        "screwdriver"   : 20
     </rosparam>
 
     <!-- NODES -->
@@ -56,7 +64,7 @@
         <arg name="use_baxter_display" value="$(arg use_baxter_display)"/>
         <arg name="print_level"        value="$(arg print_level)"/>
     </include>
-    
+
 
     <include file="$(find rpi_integration)/launch/face_recognition_utils.launch" if="$(arg use_face_rec)">
         <arg name="show_screen"          value="$(arg show_screen)"/>
