@@ -110,14 +110,8 @@ class RESTLearnerUtils(object):
 
 if __name__ == '__main__':
 
-    r1 = requests.post(url="http://localhost:5003/ontology/manage/remote/download",
-                  data={"ontology":"robot-v.1.0.0"})
+    requests.post(url="http://localhost:5003/ontology/manage/remote/download", data={"ontology":"robot-v.1.0.0"})
 
-    requests.post(url="http://localhost:5003/ontology/manage/local/install",
-                  data={"ontology":"robot-v.1.0.0"})
+    requests.post(url="http://localhost:5003/ontology/manage/local/install", data={"ontology":"robot-v.1.0.0"})
 
-    requests.post (url="http://localhost:5003/ontology/manage/activate",
-                   data={"ontology":"robot-v.1.0.0"})
-
-
-    print(r1.text)
+    requests.post (url="http://localhost:5003/ontology/manage/activate", data={"ontology":"robot-v.1.0.0"})
