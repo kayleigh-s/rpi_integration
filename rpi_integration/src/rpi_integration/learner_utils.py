@@ -31,6 +31,7 @@ class RESTOntoSemUtils(object):
         self.GET_chair_addr            = addr + "/bootstrap?package=backend.resources.experiments&resource=chair.knowledge"
         self.GET_robot_addr            = addr + "/bootstrap?package=backend.resources.experiments&resource=Robot_1.knowledge"
         self.GET_robot_command_addr    = addr + "/robotcommand"
+        self.GET_data                  = addr + "/iidea/data"
 
         self.HEADER                    = {
             'Content-Type': 'application/json',
@@ -62,13 +63,20 @@ class RESTOntoSemUtils(object):
         return self._POST(self.POST_action_callback_addr, act_dict)
 
     def POST_verbal_command(self, command_dict):
-        return self._POST(self.POST_verbal_command_addr, command_dict)
+        r =  self._POST(self.POST_verbal_command_addr, command_dict)
+        rospy.loginfo("VERBAL CMD RESPONSE: {}".format(r))
+        return r
 
 
     def GET_bootstrap(self):
         r1 = self._GET(self.GET_chair_addr)
         r2 = self._GET(self.GET_robot_addr)
         return r1, r2
+
+    def GET_debug(self):
+        r = self._GET(self.GET_data)
+        rospy.loginfo("DEBUG ONTOSEM: {}".format(r.text))
+        return r
 
 
 

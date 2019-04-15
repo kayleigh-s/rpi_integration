@@ -104,9 +104,11 @@ class OntoSemController(BaseController, RESTOntoSemUtils):
         #         rospy.loginfo("Waiting to start...")
         #         spoken_flag = True
 
-        self.service = rospy.Service('http_to_srv',RobotCommand, self._take_action)
-        rospy.sleep(8.0)
-        self.POST_verbal_command(json.dumps({"input": "Let's build a chair.", "source": "@ENV.HUMAN.1"}))
+        self.service = rospy.Service('/http_to_srv', RobotCommand, self._take_action)
+        rospy.sleep(5.0)
+        self.POST_verbal_command(json.dumps({"input": "Let's build a chair.", "source": "@ENV.HUMAN.1",  "type":"LANGUAGE"}))
+        rospy.sleep(3.0)
+        self.GET_debug()
         rospy.loginfo("Sent command!")
         # if self._take_action(self._cmd):
         #     self._percetual_update()
@@ -284,7 +286,7 @@ class OntoSemController(BaseController, RESTOntoSemUtils):
                 # elif result.order_id == self.LEARN_FACE:
                 #     rospy.loginfo("LEARNING: {}".format(result.names))
 
-            self.client.send_goal(goal, active_cb=_active_cb, feedback_cb=_feedback_cb, done_cb = _done_cb)
+            self.client.send_goal(self.goal, active_cb=_active_cb, feedback_cb=_feedback_cb, done_cb=_done_cb)
             self.client.wait_for_result(rospy.Duration(3.0))
 
             names = self.client.get_result()
@@ -315,7 +317,7 @@ class OntoSemController(BaseController, RESTOntoSemUtils):
 
 
         if self.use_ontosem_comms:
-            self.POST_verbal_command(self, json.dumps(cmd_dict))
+            self.POST_verbal_command(json.dumps(cmd_dict))
 
         with self.lock:
             self.LISTENING = False
