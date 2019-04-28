@@ -1,0 +1,28 @@
+# Apprentice Agents Learner [![Build Status](https://travis-ci.org/ScazLab/rpi_integration.svg?branch=master)](https://travis-ci.org/ScazLab/rpi_integration)
+
+* Running Ontosem
+First spin up the docker-compose file *in a terminal that has not sourced the baxter environment (i.e. in a terminal where you haven't run the ~baxter~ command)*   
+
+#+BEGIN_SRC bash
+  roscd rpi_inteagration
+  docker-compose -p leia -f Robot-1-no-agent.yml up
+#+END_SRC
+
+In another non-baxter terminal run the agent:t 
+
+  #+BEGIN_SRC bash
+    cd /home/scazlab/ros_devel_ws/src/rpi_integration/
+    source ./apprenticeagentstasktrees/venv/bin/activate
+    python -m backend.service.service host=localhost port=5002
+  #+END_SRC
+
+* Trouble shooting
+
+If you get an error like
+
+=ERROR: for mongod  Cannot start service mongod: driver failed programming external connectivity on endpoint lei_mongod_1 (aa6c7e2fee1b1f336b29ebdd8ea52452da05b07b29bf0829e12aebe185b33c00): Error starting userland proxy: listen tcp 0.0.0.0:27017: bind: address already in use=
+
+when starting up the ontosem docker container. Running the following in terminal should resolve the issue:
+
+~sudo killall -9 mongod~
+
