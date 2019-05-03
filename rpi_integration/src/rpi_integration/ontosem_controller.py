@@ -14,7 +14,7 @@ from ros_speech2text.msg import transcript # message format for ros_speech2text
 
 class OntoSemController(BaseController, RESTOntoSemUtils):
     """
-    Sends and receives commands from OntoSem cogntiive architecture to Baxter robot
+    Sends and receives commands from OntoSem cognitive architecture to Baxter robot
     """
 
     # These are used by face recognition software
@@ -24,6 +24,18 @@ class OntoSemController(BaseController, RESTOntoSemUtils):
     TRAIN_FACE     = 3
     DUMMY_STRING   = 'none'
 
+    SCRIPT_CMDS    = [ # Cmds to be POSTed to /iidea/input
+        {
+          "input": "Let's build a chair.",
+          "source": "@ENV.HUMAN.1",
+          "type": "LANGUAGE"
+        },
+        {
+          "input": "What are you doing?",
+          "source": "@ENV.HUMAN.1",
+          "type": "LANGUAGE"
+        }
+    ]
 
     def __init__(self):
         # Get the parameters from launchfile
@@ -33,6 +45,8 @@ class OntoSemController(BaseController, RESTOntoSemUtils):
         self.use_tts           = rospy.get_param(self.param_prefix + '/use_tts', True)
         self.use_ontosem_comms = rospy.get_param(self.param_prefix + '/use_ontosem_comms')
         self.use_face_rec      = rospy.get_param(self.param_prefix + '/use_face_rec')
+
+        self.use_script        = rospy.get_param(self.param_prefix + '/use_script', True)
 
         self.client            = actionlib.SimpleActionClient("face_recognition", FaceRecognitionAction)
         self.goal              = FaceRecognitionGoal()
@@ -107,8 +121,8 @@ class OntoSemController(BaseController, RESTOntoSemUtils):
         self.service = rospy.Service('/http_to_srv', RobotCommand, self._take_action)
         rospy.sleep(5.0)
         self.POST_verbal_command(json.dumps({"input": "Let's build a chair.", "source": "@ENV.HUMAN.1",  "type":"LANGUAGE"}))
-        rospy.sleep(3.0)
-        self.GET_debug()
+        # rospy.sleep(3.0)
+        # self.GET_debug()
         rospy.loginfo("Sent command!")
         # if self._take_action(self._cmd):
         #     self._percetual_update()
@@ -165,8 +179,8 @@ class OntoSemController(BaseController, RESTOntoSemUtils):
         faces                   = rospy.get_param(self.param_prefix + '/all_faces')
 
         workspace_1 = {"id": "workspace-1",
-                        "type": "WORKSPACE", 
-                        "objects": [], 
+                        "type": "WORKSPACE",
+                        "objects": [],
                         "faces": faces}
 
         storage_1   = {"id": "storage-1",
@@ -216,11 +230,11 @@ class OntoSemController(BaseController, RESTOntoSemUtils):
         cmd = {req.cmd: req.id, "callback": req.callback}
         rospy.loginfo("CMD: {}".format(cmd))
 
-        for key, value in cmd:
+        for key in cmd:
+            value = cmd[key]
 
             if key == "speak":
                 # Value is sentence to speak
-                # Should this be the BaseController method or taken directly from svox_tts?
                 self.say(value)
 
             elif key == "get":
@@ -232,9 +246,10 @@ class OntoSemController(BaseController, RESTOntoSemUtils):
                 else:
                     arm     = self.action_right # A method for passing cmd to left arm
 
-                r = arm((cmd, [value]), {'wait': False})
+                # r = arm((key, [value]), {'wait': False}
+                r = arm(key, [value], wait=False)
 
-                if r.success:
+                if r.finished: # this should maybe be r.result
                     rospy.loginfo("Successfully retrieved obj {}".format(value))
 
                     with self.lock:
@@ -254,7 +269,8 @@ class OntoSemController(BaseController, RESTOntoSemUtils):
         #     self._cmd = None
 
         self._perceptual_update()
-        return RobotCommandResponse("Ok")
+        # return RobotCommandResponse("Ok")
+        return("Ok")
 
     def _get_faces(self):
         """
@@ -309,11 +325,14 @@ class OntoSemController(BaseController, RESTOntoSemUtils):
         with self.lock:
             self.LISTENING = True
 
-        # What to do here?
-        cmd_dict = {}
-        cmd_dict["type"]    = "LANGUAGE"
-        cmd_dict["input"]   = msg.transcript
-        cmd_dict["source"]  = "ENV.HUMAN.1"
+        if self.use_script:
+            cmd_dict = SCRIPT_CMDS.pop(0)
+
+        else:
+            cmd_dict = {}
+            cmd_dict["type"]    = "LANGUAGE"
+            cmd_dict["input"]   = msg.transcript
+            cmd_dict["source"]  = "ENV.HUMAN.1"
 
 
         if self.use_ontosem_comms:
